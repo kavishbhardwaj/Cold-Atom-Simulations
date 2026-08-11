@@ -1,0 +1,32 @@
+model: level_a_effective_two_level
+atom:
+  species: rb87
+  transition: d2_f2_to_fprime3_effective
+laser:
+  configuration: six_independent_beams
+  power_per_beam_w: 0.010
+  waist_m: 0.008
+  detuning_gamma: -2.0
+repump:
+  modeled: false
+  note: Phase 1 assumes atoms remain in the effective cooling cycle.
+magnetic_field:
+  model: ideal_quadrupole_plus_uniform_stray
+  radial_gradient_t_per_m: 0.10
+  uniform_stray_t: [0.0, 0.0, 0.0]
+  stray_gradient_t_per_m: [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+gravity:
+  vector_m_per_s2: [0.0, 0.0, -9.80665]
+simulation:
+  mode: quick
+  duration_s: 0.0001
+  max_step_s: 0.00001
+  initial_position_m: [0.001, 0.0005, 0.0005]
+  initial_velocity_m_per_s: [0.0, 0.0, 0.0]
+monte_carlo:
+  atoms: 64
+  time_step_s: 0.000000005
+  store_every: 200
+  seed: 20260811
+output:
+  directory: results/phase1
