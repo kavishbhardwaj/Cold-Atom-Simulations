@@ -67,31 +67,32 @@ python examples/generate_phase1_results.py
 
 ## Selected Phase-1 results
 
-Every displayed PNG has a vector SVG alternative and underlying numerical arrays
-in [`phase1_reference.npz`](results/phase1/phase1_reference.npz).
+The complete captioned gallery, parameters, interpretations, SVG alternatives,
+and numerical-data links are collected in **[results/README.md](results/README.md)**.
+The four figures below provide an immediate scientific overview.
 
-| Apparatus geometry | Physical anti-Helmholtz field |
+### Apparatus and physical magnetic field
+
+| Six-beam/coil geometry | Segmented Biot–Savart field |
 |---|---|
-| ![Six beam and coil geometry](results/phase1/apparatus_geometry.png) | ![Anti-Helmholtz magnetic field](results/phase1/antihelmholtz_field.png) |
-| [SVG](results/phase1/apparatus_geometry.svg) | [SVG](results/phase1/antihelmholtz_field.svg) |
+| ![Six independent MOT beams and anti-Helmholtz coils](results/phase1/apparatus_geometry.png) | ![Anti-Helmholtz magnetic-field magnitude and vectors](results/phase1/antihelmholtz_field.png) |
+| Independent beam propagation and 40 mm anti-Helmholtz geometry. [Caption and SVG](results/README.md#1-apparatus-geometry) | Physical y=0 field map from 256 segments per loop. [Caption, SVG and data](results/README.md#2-geometrical-anti-helmholtz-magnetic-field) |
 
-| Deterministic force map | Adaptive 3D trajectories |
+### Force and trajectories
+
+| Level-A force surface | Adaptive 3D dynamics |
 |---|---|
-| ![Force as a function of position and velocity](results/phase1/force_map_x_vx.png) | ![Three dimensional deterministic trajectories](results/phase1/deterministic_trajectories.png) |
-| [SVG](results/phase1/force_map_x_vx.svg) | [SVG](results/phase1/deterministic_trajectories.svg) |
+| ![Force versus position and velocity](results/phase1/force_map_x_vx.png) | ![Three-dimensional deterministic trajectories](results/phase1/deterministic_trajectories.png) |
+| $F_x(x,v_x)$ at −2 Γ, 10 mW/beam and 0.10 T/m. [Caption, SVG and data](results/README.md#3-deterministic-force-map) | Three 4 ms RK45 mean-force trajectories. [Caption and SVG](results/README.md#4-adaptive-deterministic-trajectories) |
 
-| Monte Carlo convergence | Photon-recoil distribution |
-|---|---|
-| ![Monte Carlo atom number convergence](results/phase1/monte_carlo_convergence.png) | ![Photon recoil velocity distribution](results/phase1/recoil_velocity_distribution.png) |
-| [SVG](results/phase1/monte_carlo_convergence.svg) | [SVG](results/phase1/recoil_velocity_distribution.svg) |
+### Stochastic convergence
 
-![Beam and magnetic parameter sensitivities](results/phase1/parameter_sensitivities.png)
+![Photon-event Monte Carlo convergence](results/phase1/monte_carlo_convergence.png)
 
-[Vector SVG](results/phase1/parameter_sensitivities.svg)
+The fixed-seed 32–512 atom study displays sampling uncertainty rather than a
+claimed equilibrium temperature. [Read the interpretation and access SVG/data.](results/README.md#5-photon-event-monte-carlo-convergence)
 
-These are model diagnostics, not fitted experimental data.  The force map uses
-the ideal Level-A quadrupole configuration; the field map separately validates
-the geometrical coil backend.
+These are documented model diagnostics, not fitted experimental results.
 
 ## Package map
 
