@@ -30,6 +30,8 @@ def validate_config(config: dict) -> None:
             raise ValueError("OBE saturation must be non-negative and duration positive")
         if obe["rtol"] <= 0 or obe["atol"] <= 0 or obe["max_step_lifetimes"] <= 0:
             raise ValueError("OBE tolerances and maximum step must be positive")
+        if obe.get("pure_dephasing_gamma", 0.0) < 0:
+            raise ValueError("OBE pure dephasing must be non-negative")
         return
     required = ("laser", "magnetic_field", "gravity", "simulation", "monte_carlo")
     if any(section not in config for section in required):

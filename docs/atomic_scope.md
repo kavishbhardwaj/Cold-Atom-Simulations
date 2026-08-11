@@ -16,6 +16,10 @@ Natural rubidium contains both stable isotopes, so a real vapour cell can show
 85Rb and 87Rb spectral features. Isotope selectivity comes from laser frequency,
 not from the vapour containing only one isotope. Phase 5 loading must therefore
 allow isotope abundance or enriched-source composition explicitly.
+The registry records the approximate natural fractions (85Rb 72.17%, 87Rb
+27.83%) so that future loading work cannot silently assume equal abundance.
+Those fractions are provenance data only in Phase 3; they are not yet used to
+predict loading.
 
 ## Why D1 is not interchangeable with D2
 
@@ -25,6 +29,11 @@ line strength and wavelength. A D2 transition table cannot be relabeled D1.
 D1 is valuable for gray molasses and Λ-system coherence, but those effects are
 precisely where population-only rates are inadequate. Credible D1 support needs
 its own hyperfine data plus the Level-C multilevel Hamiltonian and decay graph.
+Using D1 and D2 simultaneously is physically meaningful for specialized cooling,
+state preparation or probing, but it creates a multi-frequency, multi-manifold
+Hamiltonian. A conventional 87Rb vapour-cell MOT normally uses D2 cooling and a
+D2 repump; adding D1 is therefore a new experiment model, not an automatic
+accuracy upgrade.
 
 ## Why 85Rb is not a parameter substitution
 
@@ -38,13 +47,37 @@ rebuilt. Mass and wavelength replacement alone would be scientifically wrong.
 | Isotope/line | Constants registry | Level A | Level B | Level C |
 |---|---:|---:|---:|---:|
 | 87Rb D2 | yes | yes | 24-population D2 | reduced stretched transition |
-| 87Rb D1 | yes | not configured | not implemented | not implemented |
-| 85Rb D2 | yes | not configured | not implemented | not implemented |
-| 85Rb D1 | yes | not configured | not implemented | not implemented |
+| 87Rb D1 | yes | not configured | not implemented | generic reduced two-level |
+| 85Rb D2 | yes | not configured | not implemented | generic reduced two-level |
+| 85Rb D1 | yes | not configured | not implemented | generic reduced two-level |
 
 “Constants registry” means wavelength, lifetime, mass, nuclear spin and ground
 splitting have provenance. It does not mean a solver silently supports the line.
 `AtomicLine.model_support` exposes that distinction programmatically.
+The reduced two-level OBE can use any registered lifetime and detuning because
+it deliberately discards hyperfine structure; this is useful for analytical
+line-scale comparisons but is not a D1/85Rb MOT implementation.
+The registry also derives wave number, recoil velocity, recoil temperature and
+two-level Doppler temperature from each line's wavelength, lifetime and isotope
+mass. These comparisons help expose scale changes without implying dynamic
+support.
+
+## Practical comparison
+
+| System | Typical role relevant here | What must change from the reference |
+|---|---|---|
+| 87Rb D2 | Standard F=2→F'=3 MOT cooling; F=1→F'=2 repump | Implemented Level A/B reference |
+| 87Rb D1 | Λ gray molasses, Raman/EIT-style preparation and probing | 5P1/2 F'=1,2 basis, D1 strengths, coherent multi-frequency OBE |
+| 85Rb D2 | Standard F=3→F'=4 MOT cooling; F=2→F'=3 repump | I=5/2 basis, 85Rb hyperfine offsets, strengths and branching |
+| 85Rb D1 | 85Rb D1 molasses/coherent preparation | Both the isotope basis and D1 coherent couplings change |
+
+D2 is especially convenient for a conventional alkali MOT because its upper
+fine-structure manifold contains the `F→F+1` stretched cycling transition. On
+D1 the maximum excited F is not one larger than the maximum ground F, so there
+is no analogous closed stretched cycling line. D1 can still exert trapping and
+cooling forces, but leakage and coherent Λ physics are central rather than a
+small correction. This is why “support both lines” requires a genuine model
+extension, not a wavelength switch.
 
 ## Cohesive extension path
 

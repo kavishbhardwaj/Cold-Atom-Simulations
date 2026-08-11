@@ -34,3 +34,21 @@ def test_tolerance_refinement_converges():
     _, coarse = model.evolve(initial, 8.0, rtol=1e-6, atol=1e-8, max_step=0.2)
     _, fine = model.evolve(initial, 8.0, rtol=1e-9, atol=1e-11, max_step=0.05)
     np.testing.assert_allclose(coarse[-1], fine[-1], atol=2e-6)
+
+
+def test_pure_dephasing_matches_generalized_analytic_steady_state():
+    for dephasing_gamma in (0.1, 0.5, 2.0):
+        model = TwoLevelOBE.from_saturation(
+            3.0,
+            -1.5,
+            1.2,
+            dephasing_rate=dephasing_gamma * 3.0,
+        )
+        assert model.steady_state()[1, 1].real == pytest.approx(
+            model.analytic_excited_population(), rel=2e-12
+        )
+
+
+def test_negative_pure_dephasing_is_rejected():
+    with pytest.raises(ValueError, match="dephasing"):
+        TwoLevelOBE(1.0, 0.0, 1.0, -0.1)

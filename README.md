@@ -130,6 +130,11 @@ The curated figures below provide an immediate scientific overview.
 | ![Reduced OBE steady state](results/phase3/obe_steady_state.png) | ![Damping versus power and detuning](results/phase3/damping_power_detuning.png) |
 | Coherence-resolving two-state steady response. [Caption, SVG and data](results/README.md#phase-3-reduced-optical-bloch-results) | The damping optimum moves with detuning and power broadening. [Physical explanation, SVG and data](results/README.md#why-damping-can-fall-as-power-increases) |
 
+| D1/D2 and isotope scales | Homogeneous dephasing |
+|---|---|
+| ![Rubidium isotope and line comparison](results/phase3/atomic_line_comparison.png) | ![Reduced OBE response under pure dephasing](results/phase3/obe_dephasing.png) |
+| Registry comparison without overstating solver support. [Scope and data](results/README.md#rubidium-isotope-and-line-comparison) | A controlled Lindblad broadening model. [Caption, SVG and data](results/README.md#pure-dephasing-response) |
+
 ![Beam-waist force under fixed-power and fixed-intensity conditions](results/phase3/waist_conditioned_force.png)
 
 [Why the fixed-power curve is non-monotonic, with SVG and numerical data.](results/README.md#why-force-can-decrease-as-waist-increases)
@@ -169,11 +174,14 @@ These are documented model diagnostics, not fitted experimental results.
 ```text
 src/cold_atom_mot/
   atomic/rb87.py             sourced constants and derived recoil scales
+  atomic/species.py          explicit 85Rb/87Rb D1/D2 scope registry
   laser/beam.py              independent Gaussian beams and six-beam geometry
   laser/polarization.py      propagation/local spherical polarization bases
   magnetic/fields.py         ideal quadrupole and residual fields
   magnetic/coils.py          segmented-wire circular coils
   physics/force.py           documented Level-A radiation-pressure force
+  physics/rate_equation.py   Level-B hyperfine/Zeeman populations
+  physics/optical_bloch.py   reduced Level-C density-matrix backend
   solvers/deterministic.py   adaptive mean-force trajectories
   solvers/monte_carlo.py     discrete photon events and recoil
   io/config.py               validated YAML configuration
@@ -206,10 +214,10 @@ different physical systems and approximation levels.
 
 ## Roadmap
 
-1. **Phase 2 validation extension:** matched PyLCP rate-equation comparisons under
+1. **Level-B validation extension:** matched PyLCP rate-equation comparisons under
    identical bases, linewidth, intensity and polarization conventions.
-2. **Phase 3:** documented Hamiltonian/Lindblad OBE backend with tolerance studies
-   and selected PyLCP cross-validation.
+2. **Level-C extension:** enlarge the validated reduced OBE to selected multilevel
+   cooling/repump subsystems before attempting a full six-beam coherent basis.
 3. **Phase 4:** phase-resolved six-beam polarization gradients, light shifts,
    Sisyphus dynamics, diffusion and residual-field suppression studies.
 4. **Phase 5:** sourced Rb vapour pressure, independently specified background

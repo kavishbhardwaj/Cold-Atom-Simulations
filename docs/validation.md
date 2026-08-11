@@ -67,6 +67,8 @@ and magnetic Hamiltonian.
 - zero drive relaxes to the ground state and produces zero radiation force;
 - time evolution preserves trace and approaches the stationary state;
 - tighter integration tolerance and smaller maximum step converge;
+- a pure-dephasing Lindblad channel agrees with its generalized analytical
+  stationary population;
 - the atomic registry distinguishes 85Rb/87Rb and D1/D2 while exposing that only
   87Rb D2 has high-fidelity solver support.
 
