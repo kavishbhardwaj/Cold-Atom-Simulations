@@ -1,0 +1,10 @@
+# Geometry study input for AntiHelmholtzPair.symmetric; not used by Level-A CLI yet.
+coils:
+  radius_m: 0.04
+  separation_m: 0.04
+  turns: 50
+  current_a: 2.0
+  segments: 256
+  second_coil_tilt_deg: 1.0
+  lateral_offset_m: 0.001
+  current_imbalance: 0.01

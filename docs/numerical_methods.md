@@ -1,0 +1,49 @@
+# Numerical methods and reproducibility
+
+## Units and configuration
+
+Calculations use SI units internally.  `configs/rb87_standard_mot.yaml` records
+the Level-A quick-run parameters and fixed seed.  YAML validation rejects
+negative power, non-positive waist, missing sections and non-positive time
+scales.  `configs/rb87_misaligned_coils.yaml` records a separate physical coil
+geometry study.  A production coil configuration will be integrated into the
+CLI after Phase-1 convergence and performance profiling.
+
+## Deterministic integration
+
+`scipy.integrate.solve_ivp` with adaptive RK45 is used with configurable
+`rtol`, `atol` and maximum step.  The maximum step resolves the mechanical
+motion; optical excitation is adiabatically eliminated in Level A, so RK45 does
+not resolve the 26 ns lifetime.
+
+## Biot–Savart quadrature
+
+Circular conductors are split into equal straight segments.  Each contribution
+is evaluated at its midpoint.  The default is 256 segments per loop.  The test
+suite requires the 128-to-256 segment change at a representative off-wire point
+to be below 0.1%.  Field Jacobians use centred finite differences.  The wire is
+idealized as having zero thickness, so evaluation on it is rejected.
+
+## Photon-event integration
+
+The quick configuration uses `dt=5 ns`, selected from the calculated scattering
+probability rather than image smoothness.  The solver rejects a step whenever
+`max(R_total dt)>0.1`.  Absorption-beam selection is categorical using the six
+rates; spontaneous directions are isotropic.  A `numpy.random.Generator` with an
+explicit seed makes every run reproducible.
+
+## Stored results
+
+`results/phase1/phase1_reference.npz` stores arrays used by the figures plus a
+JSON metadata record containing configuration, units, solver, model fidelity,
+seed, step, atom count and package version.  PNG and SVG files are generated
+from the same Matplotlib figure object.  PNG is the GitHub display format; SVG
+is the document/vector alternative.
+
+## Quick and research modes
+
+Only `quick` is operational in Phase 1 and is suitable for CI-scale regression.
+A future `research` profile will increase ensemble size, coil segmentation and
+scan resolution only after convergence is demonstrated.  Naming an expensive
+profile without implementing its error controls would be misleading, so no
+inactive research config is shipped yet.
