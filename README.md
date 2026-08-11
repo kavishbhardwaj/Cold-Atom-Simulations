@@ -106,7 +106,8 @@ The commands write `results/phase1/phase1_run.npz`, including deterministic and
 Monte Carlo arrays plus JSON metadata recording configuration, units, model
 fidelity, solver, seed, atom number, time step and package version, and
 `results/phase2/phase2_rate_equation.npz`, containing the Level-B force and
-manifold-population profile with corresponding metadata.
+manifold-population profile, and `results/phase3/phase3_obe_run.npz`, containing
+the density-matrix evolution and steady state with corresponding metadata.
 
 Regenerate the documented reference dataset and every PNG/SVG pair with:
 
@@ -118,7 +119,7 @@ python examples/generate_phase3_results.py
 
 ## Selected simulation results
 
-The complete Phase-1 and Phase-2 gallery, parameters, interpretations, SVG alternatives,
+The complete Phase-1, Phase-2, and Phase-3 gallery, parameters, interpretations, SVG alternatives,
 and numerical-data links are collected in **[results/README.md](results/README.md)**.
 The curated figures below provide an immediate scientific overview.
 
