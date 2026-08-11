@@ -29,9 +29,15 @@ COLORS = ("#315a8c", "#d45b36", "#3a8f65")
 
 
 def save_figure(output_dir: Path, name: str) -> None:
-    """Save the current figure as a GitHub-renderable SVG."""
+    """Save the current figure as display-ready PNG and vector SVG files."""
 
     plt.tight_layout()
+    plt.savefig(
+        output_dir / f"{name}.png",
+        format="png",
+        dpi=220,
+        bbox_inches="tight",
+    )
     plt.savefig(
         output_dir / f"{name}.svg",
         format="svg",

@@ -27,22 +27,25 @@ a one-dimensional thermal velocity spread of about 44 mm/s.
 
 | Optical-dipole potential | Gaussian beam propagation |
 | --- | --- |
-| ![Gaussian optical-dipole potential](results/trap_potential.svg) | ![Gaussian beam waist along the propagation axis](results/beam_waist.svg) |
+| ![Gaussian optical-dipole potential](results/trap_potential.png) | ![Gaussian beam waist along the propagation axis](results/beam_waist.png) |
+| [Open vector SVG](results/trap_potential.svg) | [Open vector SVG](results/beam_waist.svg) |
 
 ### Released ensemble
 
 | Ballistic time-of-flight expansion | Thermal velocity distribution |
 | --- | --- |
-| ![Ballistic cloud expansion](results/time_of_flight.svg) | ![Thermal velocity distribution](results/thermal_velocity.svg) |
+| ![Ballistic cloud expansion](results/time_of_flight.png) | ![Thermal velocity distribution](results/thermal_velocity.png) |
+| [Open vector SVG](results/time_of_flight.svg) | [Open vector SVG](results/thermal_velocity.svg) |
 
 ### Trap parameter scans
 
 | Radial and axial trap frequencies | Gravitational sag |
 | --- | --- |
-| ![Trap frequencies versus trap depth](results/trap_frequencies.svg) | ![Gravitational sag versus trap depth](results/gravitational_sag.svg) |
+| ![Trap frequencies versus trap depth](results/trap_frequencies.png) | ![Gravitational sag versus trap depth](results/gravitational_sag.png) |
+| [Open vector SVG](results/trap_frequencies.svg) | [Open vector SVG](results/gravitational_sag.svg) |
 
-The six figures are stored as browser-renderable SVG files so they can be
-opened directly on GitHub. Numerical values are recorded in
+The six figures are embedded as high-resolution PNG files for reliable GitHub
+display, with SVG links retained for vector use. Numerical values are recorded in
 [`results/summary.md`](results/summary.md). Recreate all artifacts from the
 repository root with:
 
