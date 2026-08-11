@@ -75,7 +75,7 @@ work and are not hidden behind the Level-C label.
 | A | Effective two-level Doppler/scattering force | **Implemented** |
 | B | Multilevel hyperfine/Zeeman rate equations + repump | **Implemented** |
 | C | Reduced single-transition optical Bloch equations | **Implemented** |
-| D | Phase-resolved polarization-gradient/sub-Doppler model | Phase 4 roadmap |
+| D | Phase-resolved adiabatic polarization-gradient model | **Implemented** |
 | E | Vapour loading, collision loss and experiment calibration | Phase 5 roadmap |
 
 Level A does **not** model optical pumping, dark states, coherences, repump
@@ -100,6 +100,7 @@ python -m pip install -r requirements-dev.txt
 python -m cold_atom_mot simulate configs/rb87_standard_mot.yaml
 python -m cold_atom_mot rate-equation configs/rb87_phase2_rate_equation.yaml
 python -m cold_atom_mot obe configs/rb87_phase3_obe.yaml
+python -m cold_atom_mot subdoppler configs/rb87_phase4_subdoppler.yaml
 ```
 
 The commands write `results/phase1/phase1_run.npz`, including deterministic and
@@ -115,6 +116,7 @@ Regenerate the documented reference dataset and every PNG/SVG pair with:
 python examples/generate_phase1_results.py
 python examples/generate_phase2_results.py
 python examples/generate_phase3_results.py
+python examples/generate_phase4_results.py
 ```
 
 ## Selected simulation results
@@ -122,6 +124,17 @@ python examples/generate_phase3_results.py
 The complete Phase-1, Phase-2, and Phase-3 gallery, parameters, interpretations, SVG alternatives,
 and numerical-data links are collected in **[results/README.md](results/README.md)**.
 The curated figures below provide an immediate scientific overview.
+
+### Phase-4 polarization-gradient cooling
+
+| Spatial light shifts and pumping | Sub-Doppler force versus velocity |
+|---|---|
+| ![Phase-resolved light shifts](results/phase4/light_shifts_pumping.png) | ![Sub-Doppler and Doppler forces](results/phase4/subdoppler_force_velocity.png) |
+| Clebsch–Gordan-resolved dressed potentials and mF redistribution. [SVG/data](results/README.md#phase-4-polarization-gradient-cooling) | Level-D dipole force compared with a two-level Doppler pair. [SVG/data/limitations](results/README.md#phase-4-polarization-gradient-cooling) |
+
+| Residual-field and laser sensitivity | Numerical convergence |
+|---|---|
+| ![Phase-4 sensitivities](results/phase4/subdoppler_sensitivities.png) | ![Phase-4 convergence](results/phase4/subdoppler_convergence.png) |
 
 ### Phase-3 coherences and conditioned parameter trends
 
@@ -182,6 +195,7 @@ src/cold_atom_mot/
   physics/force.py           documented Level-A radiation-pressure force
   physics/rate_equation.py   Level-B hyperfine/Zeeman populations
   physics/optical_bloch.py   reduced Level-C density-matrix backend
+  physics/subdoppler.py      phase-resolved Level-D population model
   solvers/deterministic.py   adaptive mean-force trajectories
   solvers/monte_carlo.py     discrete photon events and recoil
   io/config.py               validated YAML configuration

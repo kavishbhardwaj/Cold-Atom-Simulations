@@ -196,6 +196,26 @@ sample without a nonzero bias defining that axis.
 [Vector SVG](phase2/zeeman_populations.svg) ·
 [numerical arrays](phase2/phase2_reference.npz)
 
+## Phase-4 polarization-gradient cooling
+
+Reference parameters are 87Rb D2 F=2→F′=3, δ=−3Γ and `s=0.08` per coherent beam. Six optical phases are recorded in YAML and NPZ.
+
+| Polarization lattice | Light shifts and pumping |
+|---|---|
+| ![Polarization](phase4/polarization_lattice.png) | ![Shifts](phase4/light_shifts_pumping.png) |
+| [SVG](phase4/polarization_lattice.svg) | [SVG](phase4/light_shifts_pumping.svg) |
+
+| Velocity force | Field/laser sensitivity |
+|---|---|
+| ![Force](phase4/subdoppler_force_velocity.png) | ![Sensitivity](phase4/subdoppler_sensitivities.png) |
+| [SVG](phase4/subdoppler_force_velocity.svg) | [SVG](phase4/subdoppler_sensitivities.svg) |
+
+![Convergence](phase4/subdoppler_convergence.png)
+
+[SVG](phase4/subdoppler_convergence.svg) · [data](phase4/phase4_reference.npz) · [configuration](../configs/rb87_phase4_subdoppler.yaml) · [theory](../docs/theory.md#level-d-phase-resolved-polarization-gradient-model)
+
+The axial-field scan includes Zeeman detuning but not transverse-field coherences. The Einstein temperature is emitted only for positive friction and uses approximate isotropic recoil diffusion; neither is experimental validation.
+
 ## Phase-3 reduced optical-Bloch results
 
 ### OBE steady state

@@ -44,12 +44,12 @@ rebuilt. Mass and wavelength replacement alone would be scientifically wrong.
 
 ## Support matrix
 
-| Isotope/line | Constants registry | Level A | Level B | Level C |
-|---|---:|---:|---:|---:|
-| 87Rb D2 | yes | yes | 24-population D2 | reduced stretched transition |
-| 87Rb D1 | yes | not configured | not implemented | generic reduced two-level |
-| 85Rb D2 | yes | not configured | not implemented | generic reduced two-level |
-| 85Rb D1 | yes | not configured | not implemented | generic reduced two-level |
+| Isotope/line | Constants registry | Level A | Level B | Level C | Level D |
+|---|---:|---:|---:|---:|---:|
+| 87Rb D2 | yes | yes | 24-population D2 | reduced stretched transition | adiabatic F=2→F′=3 PGC |
+| 87Rb D1 | yes | not configured | not implemented | generic reduced two-level | not implemented |
+| 85Rb D2 | yes | not configured | not implemented | generic reduced two-level | not implemented |
+| 85Rb D1 | yes | not configured | not implemented | generic reduced two-level | not implemented |
 
 “Constants registry” means wavelength, lifetime, mass, nuclear spin and ground
 splitting have provenance. It does not mean a solver silently supports the line.

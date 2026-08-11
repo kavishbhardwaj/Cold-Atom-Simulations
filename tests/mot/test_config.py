@@ -27,3 +27,11 @@ def test_phase3_config_rejects_negative_saturation():
     config['obe']['saturation'] = -0.1
     with pytest.raises(ValueError, match="saturation"):
         validate_config(config)
+
+
+def test_phase4_configuration_loads_and_rejects_missing_phase():
+    config = load_config("configs/rb87_phase4_subdoppler.yaml")
+    assert config["model"] == "level_d_phase_resolved_pgc"
+    config["laser"]["phases_rad"] = config["laser"]["phases_rad"][:-1]
+    with pytest.raises(ValueError, match="six phases"):
+        validate_config(config)

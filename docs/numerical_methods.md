@@ -77,3 +77,12 @@ The committed power–detuning map varies both parameters instead of presenting 
 single unexplained power trace. The waist figure presents fixed-power and
 fixed-peak-intensity conditions at the same x=2 mm evaluation point. All arrays
 and the held-fixed choices are stored in `results/phase3/phase3_reference.npz`.
+
+## Phase-resolved population dynamics
+
+Level D integrates five ground populations with adaptive RK45 along `x=v t`.
+Interference with transverse beams makes the general six-beam field periodic
+over one wavelength, so averages use complete λ periods and discard the first
+half. The committed convergence scan refines 20–80 samples per period. Numerical
+light-shift gradients use `2e-5/k`. Phase, detuning, saturation and uniform field
+are stored in YAML and NPZ metadata.

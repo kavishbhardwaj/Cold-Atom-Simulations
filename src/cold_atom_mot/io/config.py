@@ -9,6 +9,7 @@ from ..magnetic.fields import CompositeField, IdealQuadrupole, ResidualField
 from ..physics.force import EffectiveMOTForce
 from ..physics.rate_equation import BeamFamily, MultilevelRateEquationMOT
 from ..atomic.levels import build_rb87_d2_basis
+from ..physics.subdoppler import coherent_six_beam_field, PolarizationGradientModel
 
 
 def load_config(path: str | Path, *, validate: bool = True) -> dict:
@@ -21,6 +22,18 @@ def load_config(path: str | Path, *, validate: bool = True) -> dict:
 
 def validate_config(config: dict) -> None:
     """Reject missing or manifestly unphysical inputs for each fidelity level."""
+    if config.get("model") == "level_d_phase_resolved_pgc":
+        for section in ("atom", "laser", "magnetic_field", "simulation", "output"):
+            if section not in config:
+                raise ValueError(f"Level-D configuration requires {section}")
+        laser, simulation = config["laser"], config["simulation"]
+        if laser["saturation_per_beam"] < 0 or laser["detuning_gamma"] == 0:
+            raise ValueError("PGC saturation must be non-negative and detuning non-zero")
+        if len(laser["phases_rad"]) != 6 or simulation["periods"] <= simulation["discard_periods"]:
+            raise ValueError("PGC requires six phases and periods greater than discarded periods")
+        if simulation["steps_per_period"] < 8 or simulation["velocity_m_per_s"] == 0:
+            raise ValueError("PGC resolution must be >=8 and probe velocity non-zero")
+        return
     if config.get("model") == "level_c_reduced_two_level_obe":
         required = ("atom", "obe", "output")
         if any(section not in config for section in required):
@@ -91,3 +104,12 @@ def build_multilevel_model(config: dict) -> MultilevelRateEquationMOT:
         field,
         np.asarray(config["gravity"]["vector_m_per_s2"], dtype=float),
     )
+
+
+def build_subdoppler_model(config: dict) -> PolarizationGradientModel:
+    """Build the explicitly phase-coherent Level-D F=2 -> F'=3 model."""
+    atom = Rb87D2(); laser = config["laser"]
+    beams = coherent_six_beam_field(atom.wave_number, laser["saturation_per_beam"], laser["phases_rad"])
+    return PolarizationGradientModel(atom.gamma, laser["detuning_gamma"] * atom.gamma,
+                                     atom.wave_number, beams,
+                                     magnetic_field_t=config["magnetic_field"]["uniform_t"])

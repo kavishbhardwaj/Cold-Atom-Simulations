@@ -263,3 +263,32 @@ rho_ee = |Omega|² gamma_2 /
 
 This is a controlled homogeneous-dephasing model, not a replacement for
 explicit stochastic laser-frequency noise or a measured laser spectrum.
+
+## Level D: phase-resolved polarization-gradient model
+
+Phase 4 selects the closed 87Rb D2 `F=2 -> F'=3` manifold. D2 is retained for
+continuity with the MOT cycling transition; D1 gray molasses and 85Rb require
+different hyperfine graphs and are not represented by changed constants. Each
+beam contributes `E(r)=sum_b sqrt(s_b) epsilon_b exp[i(k_b.r+phi_b)]`.
+Projection about the fixed quantization axis gives local `s_q(r)`. For
+`m -> m'=m+q`, the squared coupling is `C²_mq s_q`. Low-saturation adiabatic
+elimination gives
+
+```text
+U_m = sum_q hbar delta_mq Gamma² C²_mq s_q / [8(delta_mq²+Gamma²/4)],
+R_mq = Gamma³ C²_mq s_q / [8(delta_mq²+Gamma²/4)].
+```
+
+The transition detuning includes the projected linear Zeeman shift. Excitation
+and normalized spontaneous branching form a conservative five-state generator
+`dp/dt=A(r)p`. Along `x=vt`, initial transients are discarded and
+`F_x=-average[sum_m p_m partial_x U_m]` is evaluated over complete optical
+periods. This is the Sisyphus correlation between climbing a dressed potential
+and pumping into another Zeeman state.
+
+The approximation neglects ground coherences, excited populations, nonadiabatic
+corrections, recoil during the force solve, repump coupling, Gaussian envelopes
+and uncontrolled phase noise. Transverse magnetic suppression requires
+coherences; only axial Zeeman sensitivity is claimed. The recoil-diffusion
+Einstein estimate is stored only for positive friction and is not an
+experimental or complete equilibrium-temperature prediction.

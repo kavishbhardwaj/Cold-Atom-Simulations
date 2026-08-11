@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import numpy as np
 from . import __version__
-from .io.config import build_effective_model, build_multilevel_model, load_config
+from .io.config import build_effective_model, build_multilevel_model, build_subdoppler_model, load_config
 from .solvers.deterministic import integrate_trajectory
 from .solvers.monte_carlo import simulate_photon_events
 from .atomic.species import get_atomic_line
@@ -87,6 +87,26 @@ def optical_bloch(config_path: str) -> None:
     np.savez_compressed(path, time_s=time, density_matrix=density, steady_density_matrix=model.steady_state(), metadata_json=json.dumps(metadata))
     print(path)
 
+
+def subdoppler(config_path: str) -> None:
+    """Evaluate a reproducible Level-D cycle-averaged force point."""
+    config = load_config(config_path); model = build_subdoppler_model(config)
+    parameters = config["simulation"]; velocity = parameters["velocity_m_per_s"]
+    options = dict(periods=parameters["periods"], discard=parameters["discard_periods"],
+                   steps_per_period=parameters["steps_per_period"])
+    force = model.moving_average_force(velocity, **options)
+    friction = model.friction_coefficient(velocity, **options)
+    output = Path(config["output"]["directory"]); output.mkdir(parents=True, exist_ok=True)
+    metadata = {"simulation_version": __version__, "config": config,
+                "units": {"velocity": "m/s", "force": "N", "friction": "kg/s"},
+                "solver": "adiabatically eliminated F=2 to Fprime=3 optical-pumping trajectory",
+                "model_fidelity": "Level D phase-resolved population Sisyphus model"}
+    path = output / "phase4_subdoppler_run.npz"
+    np.savez_compressed(path, velocity_m_per_s=velocity, force_x_n=force,
+                        friction_kg_per_s=friction, metadata_json=json.dumps(metadata))
+    print(path)
+
+
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog="cold-atom-mot")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -96,6 +116,8 @@ def main(argv=None) -> None:
     level_b.add_argument("config")
     level_c = subparsers.add_parser("obe")
     level_c.add_argument("config")
+    level_d = subparsers.add_parser("subdoppler")
+    level_d.add_argument("config")
     args = parser.parse_args(argv)
     if args.command == "simulate":
         simulate(args.config)
@@ -103,3 +125,5 @@ def main(argv=None) -> None:
         rate_equation(args.config)
     elif args.command == "obe":
         optical_bloch(args.config)
+    elif args.command == "subdoppler":
+        subdoppler(args.config)

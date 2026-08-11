@@ -42,3 +42,7 @@ that constants and equations can be audited.
     *Communications in Mathematical Physics* **48**, 119–130 (1976),
     <https://doi.org/10.1007/BF01608499>. Master-equation dissipator used by the
     reduced Phase-3 optical-Bloch backend.
+12. C. N. Cohen-Tannoudji and W. D. Phillips, “New mechanisms for laser
+    cooling,” *Physics Today* **43**(10), 33 (1990),
+    <https://doi.org/10.1063/1.881239>. Sisyphus-cooling interpretation used in
+    the Phase-4 discussion.

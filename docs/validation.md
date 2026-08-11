@@ -75,3 +75,12 @@ and magnetic Hamiltonian.
 This validates the reduced solver, not a full multilevel MOT OBE. External PyLCP
 comparison and a 24-state coherent Hamiltonian remain validation gates before
 claiming full Level-C MOT support.
+
+## Phase-4 checks and boundary
+
+Tests require a periodic transverse field; normalized local σ−/π/σ+ fractions;
+a probability-conserving pumping generator with non-negative transfer rates;
+physical stationary populations; finite state-resolved shifts and forces; the
+expected axial Zeeman spacing; and force convergence under grid refinement.
+These are internal checks, not PyLCP or experimental validation. A multilevel
+OBE retaining ground coherences is the next external-validation gate.
