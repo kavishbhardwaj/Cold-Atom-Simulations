@@ -39,3 +39,22 @@ PyLCP rate equations.  Phase 3 must compare steady-state OBEs and tolerance
 refinement.  Phase 4 must reproduce known 1D polarization-gradient limits before
 attempting phase-coherent 3D claims.  Phase 5 requires published or measured
 collision inputs and experiment-specific calibration.
+
+## Phase-2 checks
+
+- the Racah implementation reproduces known Clebsch–Gordan values and selection
+  rule zeros;
+- the basis contains exactly 8 ground and 16 excited Zeeman states;
+- every generated transition satisfies `m'=m+q` and the stretched cycling
+  transition has unit strength under the saturation convention;
+- spontaneous branching from every excited Zeeman state sums to one;
+- every rate-generator column sums to zero;
+- stationary populations are non-negative and normalized;
+- adding repump light transfers steady-state population back into ground F=2;
+- the ideal Level-B force is restoring in position and damping in velocity.
+
+These checks validate implementation consistency and analytic limits. They are
+not an independent atomic-physics benchmark. A matched PyLCP comparison remains
+required before claiming external Level-B validation; the comparison must use
+the same hyperfine basis, saturation convention, beam polarizations, detunings
+and magnetic Hamiltonian.

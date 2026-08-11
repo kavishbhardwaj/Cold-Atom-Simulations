@@ -102,3 +102,77 @@ additionally requires phase-resolved fields and spatial light shifts.  Empty
 APIs for these models are intentionally absent.  Vapour pressure, capture and
 loading/loss require Phase-5 collision and calibrated geometry inputs and are
 also not approximated by arbitrary curves.
+
+## Level B: multilevel population rate equations
+
+Phase 2 uses the complete 87Rb D2 hyperfine/Zeeman population basis
+
+```text
+5S1/2: F=1 (3 states), F=2 (5 states)
+5P3/2: F'=0,1,2,3 (1+3+5+7 states), total=24.
+```
+
+Allowed electric-dipole couplings obey `m'=m+q`, `q∈{-1,0,+1}` and `ΔF=0,±1`
+(excluding 0→0). Matrix elements are generated from
+
+```text
+|<F,m;1,q|F',m'>|²
+```
+
+using the Racah factorial expression, scaled to the documented hyperfine line
+strengths and then to unity for the closed stretched F=2,m=2 → F'=3,m'=3
+transition. This last normalization matches the circular cycling-transition
+saturation-intensity convention. Spontaneous branching is generated from the
+same squared dipole matrix elements and normalized independently for every
+excited Zeeman state.
+
+For travelling beam `b` and transition `g→e`, the stimulated rate is
+
+```text
+W_b,ge = (Γ/2) s_b C_ge² P_b(q) /
+         [1 + (2 δ_b,ge/Γ)²],
+δ_b,ge = δ_b + δ_hfs - k_b·v
+         - (μB/ℏ)(g_e m_e - g_g m_g)|B|.
+```
+
+`P_b(q)` is the local spherical polarization fraction about `B/|B|`. At a field
+zero the code uses a fixed z quantization axis; for a fully symmetric six-beam
+configuration observables are basis invariant, but asymmetric zero-field cases
+should be interpreted with care. Polarization impurity mixes the calculated
+fractions with an isotropic one-third background.
+
+Unlike Level A, this expression has no inserted shared-saturation denominator:
+stimulated absorption/emission and the finite ground/excited populations produce
+saturation dynamically. Adding both mechanisms would double-count saturation.
+Cooling and repump use the common D2 reference wavevector; their 6.8 GHz
+frequency difference changes photon momentum by less than 2×10⁻⁵ and is
+neglected at this fidelity.
+
+The population vector obeys
+
+```text
+dp_e/dt = Σ_g,b W_b,ge (p_g-p_e) - Γ p_e,
+dp_g/dt = Σ_e,b W_b,ge (p_e-p_g) + Γ Σ_e b_e→g p_e.
+```
+
+The stationary solution is the normalized null vector of this conservative
+linear generator. The beam force retains net stimulated momentum transfer,
+
+```text
+F_b = ℏ k_b Σ_ge W_b,ge (p_g-p_e),
+F = Σ_b F_b + m g.
+```
+
+Cooling beams address F=2→F'=3 and repump beams address F=1→F'=2, while their
+off-resonant couplings to the other allowed excited hyperfine levels are kept.
+Couplings to the other ground hyperfine manifold are neglected because their
+6.835 GHz separation is far outside the configured linewidths.
+
+### What Level B still cannot describe
+
+The state vector contains populations, not a density matrix. Consequently the
+model excludes ground/excited coherences, coherent population trapping, dark
+states, Raman resonances, spatially varying light shifts, stimulated-force
+interference and Sisyphus/polarization-gradient cooling. Those require Level C
+OBEs and Level D phase-resolved fields. A Level-B temperature is therefore not
+reported from the steady-state force alone.

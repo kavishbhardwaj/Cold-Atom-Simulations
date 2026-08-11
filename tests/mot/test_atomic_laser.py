@@ -31,3 +31,11 @@ def test_six_beams_are_independent_and_opposite_momenta():
     beams = six_beam_mot(0.01, 0.008, -1.0, 780e-9)
     assert len(beams) == 6 and len({beam.label for beam in beams}) == 6
     assert np.allclose(sum((beam.k_vector for beam in beams), start=np.zeros(3)), 0)
+
+
+def test_counterpropagating_pair_has_opposite_local_sigma_components():
+    beams = six_beam_mot(0.01, 0.008, -1.0, 780e-9)
+    minus_x = spherical_fractions(beams[0].polarization, np.array([1, 0, 0]))
+    plus_x = spherical_fractions(beams[1].polarization, np.array([1, 0, 0]))
+    assert minus_x[-1] == pytest.approx(1.0)
+    assert plus_x[+1] == pytest.approx(1.0)

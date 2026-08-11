@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import numpy as np
 from . import __version__
-from .io.config import build_effective_model, load_config
+from .io.config import build_effective_model, build_multilevel_model, load_config
 from .solvers.deterministic import integrate_trajectory
 from .solvers.monte_carlo import simulate_photon_events
 
@@ -26,11 +26,41 @@ def simulate(config_path: str) -> None:
     print(output / "phase1_run.npz")
 
 
+def rate_equation(config_path: str) -> None:
+    """Evaluate reproducible Level-B steady populations and a force profile."""
+    config = load_config(config_path)
+    model = build_multilevel_model(config)
+    output = Path(config["output"]["directory"])
+    output.mkdir(parents=True, exist_ok=True)
+    positions = np.linspace(-config["rate_equation"]["position_extent_m"], config["rate_equation"]["position_extent_m"], config["rate_equation"]["points"])
+    force = np.empty_like(positions)
+    manifolds = np.empty((len(positions), 3))
+    for index, x in enumerate(positions):
+        population = model.steady_state(np.array([x, 0, 0]), np.zeros(3))
+        force[index] = model.force(np.array([x, 0, 0]), np.zeros(3), population)[0]
+        values = model.manifold_populations(population)
+        manifolds[index] = [values["ground_F1"], values["ground_F2"], values["excited"]]
+    metadata = {
+        "simulation_version": __version__,
+        "config": config,
+        "units": {"position": "m", "force": "N", "population": "dimensionless"},
+        "solver": "stationary linear hyperfine/Zeeman population rate equations",
+        "model_fidelity": "Level B multilevel rate equation",
+    }
+    path = output / "phase2_rate_equation.npz"
+    np.savez_compressed(path, position_m=positions, force_x_n=force, manifold_population=manifolds, metadata_json=json.dumps(metadata))
+    print(path)
+
+
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog="cold-atom-mot")
     subparsers = parser.add_subparsers(dest="command", required=True)
     command = subparsers.add_parser("simulate")
     command.add_argument("config")
+    level_b = subparsers.add_parser("rate-equation")
+    level_b.add_argument("config")
     args = parser.parse_args(argv)
     if args.command == "simulate":
         simulate(args.config)
+    elif args.command == "rate-equation":
+        rate_equation(args.config)
