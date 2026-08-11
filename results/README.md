@@ -223,6 +223,34 @@ Phase-2 population-only solver.
 [Vector SVG](phase3/obe_transients.svg) ·
 [configuration](../configs/rb87_phase3_obe.yaml)
 
+### Pure-dephasing response
+
+![Reduced OBE response under homogeneous pure dephasing](phase3/obe_dephasing.png)
+
+The extra Lindblad channel damps optical coherence without directly removing
+population. Increasing `gamma_phi` broadens and lowers the resonant response at
+fixed `s=1`. This is a homogeneous Markovian approximation for laser/environment
+phase noise, not a measured laser-lineshape model.
+
+[Vector SVG](phase3/obe_dephasing.svg) ·
+[numerical arrays](phase3/phase3_reference.npz) ·
+[equation and limitation](../docs/theory.md#pure-dephasing-in-the-reduced-obe)
+
+### Rubidium isotope and line comparison
+
+![85Rb and 87Rb D1/D2 scale comparison](phase3/atomic_line_comparison.png)
+
+The registry comparison shows wavelength, natural linewidth and recoil
+temperature for both stable isotopes and both fine-structure lines. These are
+derived atomic scales, not four equivalent simulations: only 87Rb D2 currently
+has full Level-A/Level-B MOT support, and Level C remains a reduced two-state
+backend. Natural vapour abundance and the distinct hyperfine graphs are
+documented separately.
+
+[Vector SVG](phase3/atomic_line_comparison.svg) ·
+[numerical arrays](phase3/phase3_reference.npz) ·
+[atomic-system scope](../docs/atomic_scope.md)
+
 ### Why damping can fall as power increases
 
 ![Damping coefficient over power and detuning](phase3/damping_power_detuning.png)
