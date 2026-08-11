@@ -176,3 +176,64 @@ states, Raman resonances, spatially varying light shifts, stimulated-force
 interference and Sisyphus/polarization-gradient cooling. Those require Level C
 OBEs and Level D phase-resolved fields. A Level-B temperature is therefore not
 reported from the steady-state force alone.
+
+## Level C: reduced optical Bloch equations
+
+Phase 3 introduces a coherence-resolving backend for one explicitly selected
+transition, currently the effective 87Rb D2 stretched transition. In the
+rotating frame and basis `{|g>,|e>}`,
+
+```text
+H/ℏ = [[0, Ω*/2],
+       [Ω/2, -δ]].
+```
+
+Spontaneous decay is represented by `C=sqrt(Γ)|g><e|`, and the density matrix
+obeys the Lindblad master equation
+
+```text
+dρ/dt = -i[H/ℏ,ρ] + CρC† - 1/2(C†Cρ + ρC†C).
+```
+
+The saturation convention is `s=2|Ω|²/Γ²`. The stationary excited population is
+
+```text
+ρee = (s/2) / [1+s+(2δ/Γ)²],
+```
+
+and a single travelling wave produces `F=ℏk Γρee`. The numerical Liouvillian
+solution is tested against this analytical expression over detuning and
+saturation, while adaptive time evolution tests coherent transients, trace,
+Hermiticity, positivity and tolerance refinement.
+
+This is a genuine OBE, but it is a **reduced two-state OBE**, not the eventual
+24-state cooling+repump OBE. It cannot form Raman dark states or represent six
+coherent beam phases. Its purpose is to establish a transparent Hamiltonian,
+collapse-operator, observable and validation infrastructure before enlarging the
+basis.
+
+## Why damping can decrease as beam power increases
+
+The damping coefficient is a derivative, `β=-∂F/∂v`, not the total scattering
+force. At low saturation, more power increases scattering and steepens the
+velocity response. At higher saturation, the transition population saturates
+and power broadening flattens the Lorentzian slope at a fixed detuning. Thus β
+has an optimum and can fall even while the maximum available radiation pressure
+continues toward its saturation limit. Changing detuning moves that optimum;
+a single power curve without its held-fixed detuning is incomplete.
+
+## Why force can decrease as Gaussian waist increases
+
+For a Gaussian travelling beam,
+
+```text
+I0 = 2P/(πw²),   I(r_perp)=I0 exp(-2r_perp²/w²).
+```
+
+At fixed power, increasing `w` improves spatial overlap but reduces peak
+intensity as `1/w²`; at small `w`, an off-axis atom can instead lie in the weak
+Gaussian wing. Their competition naturally produces a non-monotonic optimum.
+At fixed peak intensity, power must scale as `w²`, removing the direct intensity
+penalty, although transverse beams can still change shared saturation at an
+off-axis point. Therefore “force versus waist” has no unique meaning until
+power/intensity, evaluation position, detuning and other beams are specified.

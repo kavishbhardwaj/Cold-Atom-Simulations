@@ -63,3 +63,17 @@ adiabatic table interpolation but makes the committed data straightforward to
 reproduce. Phase 2 remains a stationary-internal-state approximation: it assumes
 internal populations relax faster than external motion. A future time-dependent
 population integrator must test that separation where it is not valid.
+
+## Reduced OBE numerics
+
+The stationary two-state OBE is solved as a 4×4 complex Liouvillian null problem
+with one row replaced by `Tr(ρ)=1`. Time-dependent density matrices are packed
+into eight real variables and integrated with adaptive RK45. Configurable
+`rtol`, `atol` and maximum step are expressed relative to the lifetime in the
+Phase-3 YAML file. Tests compare two tolerance/step settings and require their
+final density matrices to converge.
+
+The committed power–detuning map varies both parameters instead of presenting a
+single unexplained power trace. The waist figure presents fixed-power and
+fixed-peak-intensity conditions at the same x=2 mm evaluation point. All arrays
+and the held-fixed choices are stored in `results/phase3/phase3_reference.npz`.

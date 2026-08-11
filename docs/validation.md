@@ -58,3 +58,18 @@ not an independent atomic-physics benchmark. A matched PyLCP comparison remains
 required before claiming external Level-B validation; the comparison must use
 the same hyperfine basis, saturation convention, beam polarizations, detunings
 and magnetic Hamiltonian.
+
+## Phase-3 reduced-OBE checks
+
+- the stationary density matrix matches the exact two-level excited-population
+  expression over four decades of saturation and red/blue detunings;
+- density matrices are normalized, Hermitian and positive semidefinite;
+- zero drive relaxes to the ground state and produces zero radiation force;
+- time evolution preserves trace and approaches the stationary state;
+- tighter integration tolerance and smaller maximum step converge;
+- the atomic registry distinguishes 85Rb/87Rb and D1/D2 while exposing that only
+  87Rb D2 has high-fidelity solver support.
+
+This validates the reduced solver, not a full multilevel MOT OBE. External PyLCP
+comparison and a 24-state coherent Hamiltonian remain validation gates before
+claiming full Level-C MOT support.

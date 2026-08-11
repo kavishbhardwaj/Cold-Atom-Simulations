@@ -34,3 +34,10 @@ that constants and equations can be audited.
 9. A. R. Edmonds, *Angular Momentum in Quantum Mechanics*, 2nd ed. (Princeton
    University Press, 1960), <https://doi.org/10.1515/9781400884186>. Racah
    factorial convention used to generate the Phase-2 Clebsch–Gordan factors.
+10. D. A. Steck, *Rubidium 85 D Line Data*, revision 2.3.2 (2021),
+    <https://steck.us/alkalidata/rubidium85numbers.pdf>. 85Rb D1/D2 wavelength,
+    lifetime, mass and hyperfine provenance used by the atomic-line registry.
+11. G. Lindblad, “On the generators of quantum dynamical semigroups,”
+    *Communications in Mathematical Physics* **48**, 119–130 (1976),
+    <https://doi.org/10.1007/BF01608499>. Master-equation dissipator used by the
+    reduced Phase-3 optical-Bloch backend.
