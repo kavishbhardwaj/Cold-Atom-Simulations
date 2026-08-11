@@ -23,12 +23,28 @@ The repository includes a reproducible example for rubidium-87 atoms in a
 approximately 2.0 kHz and 9.4 Hz, respectively. A 20 microkelvin ensemble has
 a one-dimensional thermal velocity spread of about 44 mm/s.
 
-![Representative cold-atom simulation results](results/cold_atom_results.png)
+### Trap geometry and potential
 
-The figure shows the Gaussian trap potential, ballistic expansion after
-release, and the associated thermal velocity distribution. Numerical values
-are recorded in [`results/summary.md`](results/summary.md). Recreate both
-artifacts from the repository root with:
+| Optical-dipole potential | Gaussian beam propagation |
+| --- | --- |
+| ![Gaussian optical-dipole potential](results/trap_potential.svg) | ![Gaussian beam waist along the propagation axis](results/beam_waist.svg) |
+
+### Released ensemble
+
+| Ballistic time-of-flight expansion | Thermal velocity distribution |
+| --- | --- |
+| ![Ballistic cloud expansion](results/time_of_flight.svg) | ![Thermal velocity distribution](results/thermal_velocity.svg) |
+
+### Trap parameter scans
+
+| Radial and axial trap frequencies | Gravitational sag |
+| --- | --- |
+| ![Trap frequencies versus trap depth](results/trap_frequencies.svg) | ![Gravitational sag versus trap depth](results/gravitational_sag.svg) |
+
+The six figures are stored as browser-renderable SVG files so they can be
+opened directly on GitHub. Numerical values are recorded in
+[`results/summary.md`](results/summary.md). Recreate all artifacts from the
+repository root with:
 
 ```bash
 python results/generate_results.py
