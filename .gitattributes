@@ -1,0 +1,7 @@
+# Scientific figures and numerical result archives are generated artifacts.
+# Keep them versioned for reproducibility, but do not render their serialized
+# contents as source-code diffs in GitHub or command-line reviews.
+*.svg binary
+*.png binary
+*.pdf binary
+*.npz binary
