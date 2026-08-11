@@ -64,9 +64,9 @@ choice, current support matrix, and extension requirements.
 - conditioned two-dimensional power/detuning and fixed-power/fixed-intensity
   waist scans that expose why one-dimensional trends need not be monotonic.
 
-Phase 3 is deliberately a reduced OBE validation backend. The full 24-state
-cooling+repump OBE, coherent six-beam phases and sub-Doppler model remain future
-work and are not hidden behind the Level-C label.
+Phase 3 is deliberately a reduced OBE validation backend. Phase 4 adds coherent
+six-beam phases and an adiabatically eliminated F=2→F′=3 Sisyphus model, while
+the full 24-state OBE remains future work rather than being hidden by a label.
 
 ## Fidelity and limitations
 
@@ -121,7 +121,7 @@ python examples/generate_phase4_results.py
 
 ## Selected simulation results
 
-The complete Phase-1, Phase-2, and Phase-3 gallery, parameters, interpretations, SVG alternatives,
+The complete Phase-1 through Phase-4 gallery, parameters, interpretations, SVG alternatives,
 and numerical-data links are collected in **[results/README.md](results/README.md)**.
 The curated figures below provide an immediate scientific overview.
 

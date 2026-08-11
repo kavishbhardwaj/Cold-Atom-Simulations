@@ -172,8 +172,6 @@ class PolarizationGradientModel:
         spatial_period = 2 * np.pi / self.wave_number
         duration = periods * spatial_period / abs(velocity)
         population0 = np.ones(5) / 5 if initial_populations is None else np.asarray(initial_populations, float)
-        sign = np.sign(velocity)
-
         def rhs(time, population):
             return self.pumping_generator([velocity * time, 0, 0]) @ population
 
