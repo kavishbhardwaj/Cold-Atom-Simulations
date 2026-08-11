@@ -6,7 +6,8 @@ that constants and equations can be audited.
 1. D. A. Steck, *Rubidium 87 D Line Data*, revision 2.3.2 (2021),
    <https://steck.us/alkalidata/rubidium87numbers.pdf>. Atomic mass, D2 vacuum
    wavelength, lifetime, linewidth, saturation-intensity convention, hyperfine
-   intervals, Landé factors, and relative hyperfine strengths.
+   intervals, Landé factors, relative hyperfine strengths, isotope masses and
+   natural-abundance values used by the isotope/line registry.
 2. NIST, *Atomic Spectra Database*, Rb I,
    <https://physics.nist.gov/PhysRefData/ASD/>. Independent level/wavelength
    provenance; no claim of a new fit to NIST data is made here.

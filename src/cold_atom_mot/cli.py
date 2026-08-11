@@ -1,4 +1,4 @@
-"""Command-line entry points for reproducible Phase-1 runs."""
+"""Command-line entry points for reproducible fidelity-labelled runs."""
 
 import argparse
 import json
@@ -64,6 +64,7 @@ def optical_bloch(config_path: str) -> None:
         line.gamma_rad_s,
         parameters["detuning_gamma"] * line.gamma_rad_s,
         parameters["saturation"],
+        dephasing_rate=parameters.get("pure_dephasing_gamma", 0.0) * line.gamma_rad_s,
     )
     duration = parameters["duration_lifetimes"] / line.gamma_rad_s
     time, density = model.evolve(

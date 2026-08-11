@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cold-atom-mot"
-version = "0.3.0"
+version = "0.3.1"
 description = "Fidelity-labelled 3D semiclassical, rate-equation, and reduced-OBE 87Rb MOT simulation"
 requires-python = ">=3.10"
 dependencies = ["numpy>=2.0", "scipy>=1.13", "matplotlib>=3.9", "PyYAML>=6.0"]

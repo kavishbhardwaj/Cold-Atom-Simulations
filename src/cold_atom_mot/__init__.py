@@ -5,4 +5,4 @@ multilevel population rates, and a reduced two-state OBE. No full multilevel
 OBE, sub-Doppler, or calibrated experiment model is claimed.
 """
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"

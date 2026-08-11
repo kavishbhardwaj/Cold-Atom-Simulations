@@ -221,6 +221,10 @@ and power broadening flattens the Lorentzian slope at a fixed detuning. Thus β
 has an optimum and can fall even while the maximum available radiation pressure
 continues toward its saturation limit. Changing detuning moves that optimum;
 a single power curve without its held-fixed detuning is incomplete.
+The Phase-3 result therefore includes both a two-dimensional `(power, detuning)`
+map and fixed-detuning cuts. The descending branch is not evidence that “more
+light cools less” in every sense: the maximum scattering force can increase
+while its small-velocity derivative decreases.
 
 ## Why force can decrease as Gaussian waist increases
 
@@ -237,3 +241,25 @@ At fixed peak intensity, power must scale as `w²`, removing the direct intensit
 penalty, although transverse beams can still change shared saturation at an
 off-axis point. Therefore “force versus waist” has no unique meaning until
 power/intensity, evaluation position, detuning and other beams are specified.
+
+## Pure dephasing in the reduced OBE
+
+Laser linewidth, collisions and technical phase noise can destroy optical
+coherence without directly removing excited population. Phase 3 represents a
+Markovian approximation with
+
+```text
+C_phi = sqrt(gamma_phi/2) sigma_z,
+gamma_2 = Gamma/2 + gamma_phi.
+```
+
+The optical coherence then decays at `gamma_2`. The generalized stationary
+excited population is
+
+```text
+rho_ee = |Omega|² gamma_2 /
+         [2 Gamma (delta²+gamma_2²) + 2 |Omega|² gamma_2].
+```
+
+This is a controlled homogeneous-dephasing model, not a replacement for
+explicit stochastic laser-frequency noise or a measured laser spectrum.

@@ -15,17 +15,32 @@ class TwoLevelOBE:
     gamma: float
     detuning: float
     rabi_frequency: complex
+    dephasing_rate: float = 0.0
 
     def __post_init__(self) -> None:
         if self.gamma <= 0:
             raise ValueError("gamma must be positive")
+        if self.dephasing_rate < 0:
+            raise ValueError("dephasing_rate must be non-negative")
 
     @classmethod
-    def from_saturation(cls, gamma: float, detuning: float, saturation: float) -> "TwoLevelOBE":
+    def from_saturation(
+        cls,
+        gamma: float,
+        detuning: float,
+        saturation: float,
+        *,
+        dephasing_rate: float = 0.0,
+    ) -> "TwoLevelOBE":
         if saturation < 0:
             raise ValueError("saturation must be non-negative")
         # s = 2 |Omega|^2 / Gamma^2 for the stated two-level convention.
-        return cls(gamma, detuning, gamma * np.sqrt(saturation / 2))
+        return cls(
+            gamma,
+            detuning,
+            gamma * np.sqrt(saturation / 2),
+            dephasing_rate,
+        )
 
     @property
     def hamiltonian_over_hbar(self) -> np.ndarray:
@@ -40,6 +55,14 @@ class TwoLevelOBE:
         collapse = np.array([[0.0, np.sqrt(self.gamma)], [0.0, 0.0]], dtype=complex)
         cdag_c = collapse.conj().T @ collapse
         dissipative = collapse @ rho @ collapse.conj().T - 0.5 * (cdag_c @ rho + rho @ cdag_c)
+        if self.dephasing_rate:
+            # C_phi=sqrt(gamma_phi/2)*sigma_z makes rho_ge decay at gamma_phi.
+            sigma_z = np.diag([1.0, -1.0]).astype(complex)
+            collapse_phi = np.sqrt(self.dephasing_rate / 2) * sigma_z
+            dissipative += (
+                collapse_phi @ rho @ collapse_phi.conj().T
+                - 0.5 * (collapse_phi.conj().T @ collapse_phi @ rho + rho @ collapse_phi.conj().T @ collapse_phi)
+            )
         return coherent + dissipative
 
     def liouvillian(self) -> np.ndarray:
@@ -76,8 +99,15 @@ class TwoLevelOBE:
         return solution.t, density
 
     def analytic_excited_population(self) -> float:
-        saturation = 2 * abs(self.rabi_frequency) ** 2 / self.gamma**2
-        return 0.5 * saturation / (1 + saturation + (2 * self.detuning / self.gamma) ** 2)
+        omega_squared = abs(self.rabi_frequency) ** 2
+        transverse_decay = self.gamma / 2 + self.dephasing_rate
+        return (
+            omega_squared * transverse_decay
+            / (
+                2 * self.gamma * (self.detuning**2 + transverse_decay**2)
+                + 2 * omega_squared * transverse_decay
+            )
+        )
 
     def scattering_force(self, wave_vector: np.ndarray) -> np.ndarray:
         """Single travelling-wave force ℏ k Γ ρee at steady state."""

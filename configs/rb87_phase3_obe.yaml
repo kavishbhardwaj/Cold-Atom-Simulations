@@ -6,6 +6,8 @@ atom:
 obe:
   detuning_gamma: -1.0
   saturation: 2.0
+  pure_dephasing_gamma: 0.0
+  # Homogeneous optical-coherence decay beyond Gamma/2; zero is the ideal laser.
   duration_lifetimes: 20.0
   rtol: 1.0e-9
   atol: 1.0e-11
