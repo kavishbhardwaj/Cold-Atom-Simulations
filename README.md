@@ -12,7 +12,27 @@ The current project starts with idealized models for ballistic motion, thermal v
 - ideal Gaussian optical-dipole potential
 - radial and axial harmonic trap frequencies near the trap center
 - gravitational sag in a harmonic trap
+- reproducible example results and plots for a representative rubidium-87 trap
 - unit tests and CI
+
+## Example simulation results
+
+The repository includes a reproducible example for rubidium-87 atoms in a
+1064 nm Gaussian optical dipole trap. With a 50 micrometre beam waist and a
+1 mK trap depth, the model predicts radial and axial trap frequencies of
+approximately 2.0 kHz and 9.4 Hz, respectively. A 20 microkelvin ensemble has
+a one-dimensional thermal velocity spread of about 44 mm/s.
+
+![Representative cold-atom simulation results](results/cold_atom_results.png)
+
+The figure shows the Gaussian trap potential, ballistic expansion after
+release, and the associated thermal velocity distribution. Numerical values
+are recorded in [`results/summary.md`](results/summary.md). Recreate both
+artifacts from the repository root with:
+
+```bash
+python results/generate_results.py
+```
 
 ## Roadmap
 
