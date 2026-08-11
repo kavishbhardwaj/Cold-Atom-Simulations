@@ -8,6 +8,8 @@ from . import __version__
 from .io.config import build_effective_model, build_multilevel_model, load_config
 from .solvers.deterministic import integrate_trajectory
 from .solvers.monte_carlo import simulate_photon_events
+from .atomic.species import get_atomic_line
+from .physics.optical_bloch import TwoLevelOBE
 
 
 def simulate(config_path: str) -> None:
@@ -52,6 +54,38 @@ def rate_equation(config_path: str) -> None:
     print(path)
 
 
+
+def optical_bloch(config_path: str) -> None:
+    """Run the explicitly reduced Phase-3 two-level OBE configuration."""
+    config = load_config(config_path)
+    line = get_atomic_line(config["atom"]["isotope"], config["atom"]["line"])
+    parameters = config["obe"]
+    model = TwoLevelOBE.from_saturation(
+        line.gamma_rad_s,
+        parameters["detuning_gamma"] * line.gamma_rad_s,
+        parameters["saturation"],
+    )
+    duration = parameters["duration_lifetimes"] / line.gamma_rad_s
+    time, density = model.evolve(
+        np.array([[1, 0], [0, 0]], dtype=complex),
+        duration,
+        rtol=parameters["rtol"],
+        atol=parameters["atol"],
+        max_step=parameters["max_step_lifetimes"] / line.gamma_rad_s,
+    )
+    output = Path(config["output"]["directory"])
+    output.mkdir(parents=True, exist_ok=True)
+    metadata = {
+        "simulation_version": __version__,
+        "config": config,
+        "units": {"time": "s", "density_matrix": "dimensionless"},
+        "solver": "adaptive two-level Lindblad optical Bloch equation",
+        "model_fidelity": "Level C reduced single-transition OBE",
+    }
+    path = output / "phase3_obe_run.npz"
+    np.savez_compressed(path, time_s=time, density_matrix=density, steady_density_matrix=model.steady_state(), metadata_json=json.dumps(metadata))
+    print(path)
+
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog="cold-atom-mot")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -59,8 +93,12 @@ def main(argv=None) -> None:
     command.add_argument("config")
     level_b = subparsers.add_parser("rate-equation")
     level_b.add_argument("config")
+    level_c = subparsers.add_parser("obe")
+    level_c.add_argument("config")
     args = parser.parse_args(argv)
     if args.command == "simulate":
         simulate(args.config)
     elif args.command == "rate-equation":
         rate_equation(args.config)
+    elif args.command == "obe":
+        optical_bloch(args.config)

@@ -1,0 +1,14 @@
+model: level_c_reduced_two_level_obe
+atom:
+  isotope: 87Rb
+  line: D2
+  transition: effective_stretched_f2_m2_to_fprime3_m3
+obe:
+  detuning_gamma: -1.0
+  saturation: 2.0
+  duration_lifetimes: 20.0
+  rtol: 1.0e-9
+  atol: 1.0e-11
+  max_step_lifetimes: 0.05
+output:
+  directory: results/phase3

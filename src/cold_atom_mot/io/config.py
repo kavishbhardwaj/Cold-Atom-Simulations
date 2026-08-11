@@ -11,15 +11,26 @@ from ..physics.rate_equation import BeamFamily, MultilevelRateEquationMOT
 from ..atomic.levels import build_rb87_d2_basis
 
 
-def load_config(path: str | Path) -> dict:
+def load_config(path: str | Path, *, validate: bool = True) -> dict:
     with Path(path).open(encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
-    validate_config(config)
+    if validate:
+        validate_config(config)
     return config
 
 
 def validate_config(config: dict) -> None:
-    """Reject missing or manifestly unphysical Phase-1 inputs."""
+    """Reject missing or manifestly unphysical inputs for each fidelity level."""
+    if config.get("model") == "level_c_reduced_two_level_obe":
+        required = ("atom", "obe", "output")
+        if any(section not in config for section in required):
+            raise ValueError(f"Level-C configuration requires sections: {required}")
+        obe = config["obe"]
+        if obe["saturation"] < 0 or obe["duration_lifetimes"] <= 0:
+            raise ValueError("OBE saturation must be non-negative and duration positive")
+        if obe["rtol"] <= 0 or obe["atol"] <= 0 or obe["max_step_lifetimes"] <= 0:
+            raise ValueError("OBE tolerances and maximum step must be positive")
+        return
     required = ("laser", "magnetic_field", "gravity", "simulation", "monte_carlo")
     if any(section not in config for section in required):
         raise ValueError(f"configuration requires sections: {required}")
