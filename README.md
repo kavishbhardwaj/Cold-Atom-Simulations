@@ -69,7 +69,7 @@ python examples/generate_phase1_results.py
 
 The complete captioned gallery, parameters, interpretations, SVG alternatives,
 and numerical-data links are collected in **[results/README.md](results/README.md)**.
-The four figures below provide an immediate scientific overview.
+The five figures below provide an immediate scientific overview.
 
 ### Apparatus and physical magnetic field
 
