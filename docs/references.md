@@ -31,3 +31,6 @@ that constants and equations can be audited.
    using light-induced atom desorption,” *Physical Review A* **63**, 023404
    (2001), <https://doi.org/10.1103/PhysRevA.63.023404>. Context for the future
    loading model only; Phase 1 predicts neither loading rate nor atom number.
+9. A. R. Edmonds, *Angular Momentum in Quantum Mechanics*, 2nd ed. (Princeton
+   University Press, 1960), <https://doi.org/10.1515/9781400884186>. Racah
+   factorial convention used to generate the Phase-2 Clebsch–Gordan factors.

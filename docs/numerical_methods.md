@@ -47,3 +47,19 @@ A future `research` profile will increase ensemble size, coil segmentation and
 scan resolution only after convergence is demonstrated.  Naming an expensive
 profile without implementing its error controls would be misleading, so no
 inactive research config is shipped yet.
+
+## Level-B stationary rate equations
+
+The 24×24 population generator uses a column convention, `dp/dt=A p`. Every
+optical and decay process is inserted as equal source/sink terms, and tests
+require each generator column to sum to zero within floating-point roundoff. A
+normalization row replaces one redundant stationary equation and the resulting
+linear system is solved with `numpy.linalg.solve`. Solutions are checked for
+normalization and negative population.
+
+The reference position/velocity scans solve this system independently at every
+point; no previous solution is used as an initial guess. This is slower than an
+adiabatic table interpolation but makes the committed data straightforward to
+reproduce. Phase 2 remains a stationary-internal-state approximation: it assumes
+internal populations relax faster than external motion. A future time-dependent
+population integrator must test that separation where it is not valid.

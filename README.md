@@ -1,10 +1,11 @@
 # Cold Atom MOT Simulations
 
 A physically documented, reproducible 3D simulation framework for a six-beam
-rubidium-87 vapour-cell magneto-optical trap (MOT).  The current **Phase 1**
+rubidium-87 vapour-cell magneto-optical trap (MOT). The current framework
 implements ideal/coil magnetic fields, an effective two-level semiclassical
-radiation-pressure model, adaptive deterministic trajectories, and discrete
-photon-event Monte Carlo trajectories with absorption and spontaneous recoil.
+radiation-pressure model, adaptive deterministic trajectories, discrete
+photon-event Monte Carlo trajectories, and a **Phase-2 multilevel population
+rate-equation model** with explicit cooling and repump light.
 
 This is scientific software under active development—not experiment-control
 software and not a quantitatively calibrated prediction of a particular MOT.
@@ -29,12 +30,22 @@ The implemented approximation level and missing physics are stated explicitly.
   momentum and isotropic spontaneous-emission recoil;
 - validated YAML configuration, CLI execution and NPZ result data with metadata.
 
+## Phase-2 capabilities
+
+- explicit 24-state 87Rb D2 hyperfine/Zeeman population basis;
+- Clebsch–Gordan strengths generated from a tested Racah implementation;
+- normalized spontaneous branching derived from the same dipole elements;
+- independent six-beam cooling and repump families;
+- local polarization components and state-resolved hyperfine, Zeeman and Doppler shifts;
+- conservative stationary rate equations and population-resolved radiation force;
+- repump-power, manifold-population, Zeeman-population and force diagnostics.
+
 ## Fidelity and limitations
 
 | Level | Physical model | Repository status |
 |---|---|---|
 | A | Effective two-level Doppler/scattering force | **Implemented** |
-| B | Multilevel hyperfine/Zeeman rate equations + repump | Phase 2 roadmap |
+| B | Multilevel hyperfine/Zeeman rate equations + repump | **Implemented** |
 | C | Multilevel optical Bloch equations | Phase 3 roadmap |
 | D | Phase-resolved polarization-gradient/sub-Doppler model | Phase 4 roadmap |
 | E | Vapour loading, collision loss and experiment calibration | Phase 5 roadmap |
@@ -46,6 +57,12 @@ It must not be used to claim a sub-Doppler temperature or calibrated atom number
 See [theory](docs/theory.md), [numerics](docs/numerical_methods.md),
 [validation](docs/validation.md), and [references](docs/references.md).
 
+Level B explicitly evolves all 24 populations in the 87Rb D2 F=1,2 and
+F′=0,1,2,3 Zeeman basis. It includes cooling/repump absorption, stimulated
+emission, state-resolved Zeeman shifts and normalized spontaneous branching.
+It remains an incoherent rate equation: it cannot reproduce coherent dark
+states, light shifts, OBEs, or polarization-gradient/sub-Doppler cooling.
+
 ## Reproducible quick run
 
 Install the package and execute the committed SI-unit configuration:
@@ -53,23 +70,34 @@ Install the package and execute the committed SI-unit configuration:
 ```bash
 python -m pip install -r requirements-dev.txt
 python -m cold_atom_mot simulate configs/rb87_standard_mot.yaml
+python -m cold_atom_mot rate-equation configs/rb87_phase2_rate_equation.yaml
 ```
 
-The command writes `results/phase1/phase1_run.npz`, including deterministic and
+The commands write `results/phase1/phase1_run.npz`, including deterministic and
 Monte Carlo arrays plus JSON metadata recording configuration, units, model
-fidelity, solver, seed, atom number, time step and package version.
+fidelity, solver, seed, atom number, time step and package version, and
+`results/phase2/phase2_rate_equation.npz`, containing the Level-B force and
+manifold-population profile with corresponding metadata.
 
 Regenerate the documented reference dataset and every PNG/SVG pair with:
 
 ```bash
 python examples/generate_phase1_results.py
+python examples/generate_phase2_results.py
 ```
 
-## Selected Phase-1 results
+## Selected simulation results
 
-The complete captioned gallery, parameters, interpretations, SVG alternatives,
+The complete Phase-1 and Phase-2 gallery, parameters, interpretations, SVG alternatives,
 and numerical-data links are collected in **[results/README.md](results/README.md)**.
-The five figures below provide an immediate scientific overview.
+The curated figures below provide an immediate scientific overview.
+
+### Phase-2 hyperfine populations and force
+
+| 24-state force comparison | Cooling/repump populations |
+|---|---|
+| ![Level A and Level B restoring forces](results/phase2/force_level_a_vs_b.png) | ![Hyperfine manifold populations](results/phase2/manifold_populations.png) |
+| Effective two-level versus population-resolved force. [Caption, SVG and data](results/README.md#phase-2-multilevel-rate-equation-results) | F=1, F=2 and excited populations across the MOT. [Caption, SVG and data](results/README.md#phase-2-multilevel-rate-equation-results) |
 
 ### Apparatus and physical magnetic field
 
@@ -136,8 +164,8 @@ different physical systems and approximation levels.
 
 ## Roadmap
 
-1. **Phase 2:** explicit F=1,2 and F'=0,1,2,3 Zeeman bases, cooling/repump optical
-   pumping, branching, and matched PyLCP rate-equation comparisons.
+1. **Phase 2 validation extension:** matched PyLCP rate-equation comparisons under
+   identical bases, linewidth, intensity and polarization conventions.
 2. **Phase 3:** documented Hamiltonian/Lindblad OBE backend with tolerance studies
    and selected PyLCP cross-validation.
 3. **Phase 4:** phase-resolved six-beam polarization gradients, light shifts,

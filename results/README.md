@@ -135,6 +135,67 @@ an experimentally calibrated MOT.
 [numerical arrays](phase1/phase1_reference.npz) ·
 [misaligned-coil example](../configs/rb87_misaligned_coils.yaml)
 
+## Phase-2 multilevel rate-equation results
+
+### Level A versus Level B restoring force
+
+![Effective two-level and 24-state restoring forces](phase2/force_level_a_vs_b.png)
+
+The same cooling-beam and ideal-gradient parameters are evaluated with the
+Level-A effective cycling model and the Level-B stationary 24-population model.
+The smaller Level-B force follows from population redistribution, repump
+competition, off-resonant hyperfine excitation and state-resolved coupling; it
+is not an empirical scale factor.
+
+[Vector SVG](phase2/force_level_a_vs_b.svg) ·
+[numerical arrays](phase2/phase2_reference.npz) ·
+[Level-B equations](../docs/theory.md#level-b-multilevel-population-rate-equations)
+
+### Hyperfine-manifold populations
+
+![F=1, F=2 and excited populations across the MOT](phase2/manifold_populations.png)
+
+Steady populations are recomputed at each x position using local magnetic field,
+polarization decomposition and Zeeman shifts. The repump prevents irreversible
+accumulation in F=1, while a finite excited fraction sustains scattering.
+
+[Vector SVG](phase2/manifold_populations.svg) ·
+[numerical arrays](phase2/phase2_reference.npz)
+
+### Multilevel damping force
+
+![Level-B force versus velocity](phase2/multilevel_force_velocity.png)
+
+The odd, negative-slope structure near zero velocity is the Doppler damping
+response of the incoherent multilevel model. It is not the narrow sub-Doppler
+force feature expected from polarization gradients and coherences.
+
+[Vector SVG](phase2/multilevel_force_velocity.svg) ·
+[numerical arrays](phase2/phase2_reference.npz)
+
+### Repump-power optical pumping
+
+![Steady populations versus repump power](phase2/repump_power_scan.png)
+
+This scan directly resolves transfer between F=1, F=2 and the excited manifold
+as repump power changes. The dashed line is the 0.5 mW-per-beam reference—not a
+fit or an optimized experimental setting.
+
+[Vector SVG](phase2/repump_power_scan.svg) ·
+[numerical arrays](phase2/phase2_reference.npz)
+
+### Zeeman-state populations
+
+![Ground Zeeman populations at field zero](phase2/zeeman_populations.png)
+
+All eight ground-state populations are shown at the nominal field zero. A fixed
+z quantization axis is used exactly at B=0; symmetric observables are basis
+invariant, but individual bars should not be interpreted as a measured oriented
+sample without a nonzero bias defining that axis.
+
+[Vector SVG](phase2/zeeman_populations.svg) ·
+[numerical arrays](phase2/phase2_reference.npz)
+
 ## Foundational-model gallery
 
 These earlier plots remain useful educational checks, but they are not outputs
