@@ -63,6 +63,9 @@ def six_beam_mot(power: float, waist: float, detuning: float, wavelength: float)
     for axis, gradient_sign in zip(axes, gradient_signs):
         for propagation_sign in (-1, 1):
             direction = propagation_sign * axis
-            helicity = -propagation_sign * gradient_sign
+            # Counter-propagating beams use the same propagation-relative
+            # helicity.  Reversing k then reverses their angular momentum in a
+            # fixed laboratory/quantization basis, as required by a MOT pair.
+            helicity = gradient_sign
             beams.append(GaussianBeam(direction, np.zeros(3), power, waist, detuning, wavelength, helicity, label=f"{propagation_sign:+d}{'xyz'[len(beams)//2]}"))
     return beams
