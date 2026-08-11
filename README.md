@@ -5,11 +5,25 @@ rubidium-87 vapour-cell magneto-optical trap (MOT). The current framework
 implements ideal/coil magnetic fields, an effective two-level semiclassical
 radiation-pressure model, adaptive deterministic trajectories, discrete
 photon-event Monte Carlo trajectories, and a **Phase-2 multilevel population
-rate-equation model** with explicit cooling and repump light.
+rate-equation model** with explicit cooling and repump light. Phase 3 adds a
+coherence-resolving reduced two-level optical-Bloch backend for controlled
+validation—not yet a full 24-state six-beam OBE.
 
 This is scientific software under active development—not experiment-control
 software and not a quantitatively calibrated prediction of a particular MOT.
 The implemented approximation level and missing physics are stated explicitly.
+
+### Which rubidium isotope and optical line?
+
+The working MOT is **87Rb on the D2 line near 780.24 nm**, initially using the
+F=2→F′=3 cooling manifold and F=1→F′=2 repump. This is a common first MOT system
+with a strong near-closed cycling transition and well separated ground
+hyperfine manifolds. The code now contains an auditable registry for **87Rb and
+85Rb, D1 and D2**, but registry data are not falsely presented as full solver
+support. D1 requires a different excited manifold and is especially relevant to
+gray-molasses/coherence physics; 85Rb has different nuclear spin and hyperfine
+structure. See [atomic-system scope](docs/atomic_scope.md) for the physical
+choice, current support matrix, and extension requirements.
 
 ## Phase-1 capabilities
 
@@ -40,13 +54,27 @@ The implemented approximation level and missing physics are stated explicitly.
 - conservative stationary rate equations and population-resolved radiation force;
 - repump-power, manifold-population, Zeeman-population and force diagnostics.
 
+## Phase-3 capabilities
+
+- explicit two-state rotating-frame Hamiltonian and complex Rabi coupling;
+- Lindblad spontaneous-decay operator and density-matrix evolution;
+- steady-state coherences, excited population and single-beam force observable;
+- adaptive time evolution with tolerance-refinement validation;
+- exact agreement with the analytical two-level steady-state limit;
+- conditioned two-dimensional power/detuning and fixed-power/fixed-intensity
+  waist scans that expose why one-dimensional trends need not be monotonic.
+
+Phase 3 is deliberately a reduced OBE validation backend. The full 24-state
+cooling+repump OBE, coherent six-beam phases and sub-Doppler model remain future
+work and are not hidden behind the Level-C label.
+
 ## Fidelity and limitations
 
 | Level | Physical model | Repository status |
 |---|---|---|
 | A | Effective two-level Doppler/scattering force | **Implemented** |
 | B | Multilevel hyperfine/Zeeman rate equations + repump | **Implemented** |
-| C | Multilevel optical Bloch equations | Phase 3 roadmap |
+| C | Reduced single-transition optical Bloch equations | **Implemented** |
 | D | Phase-resolved polarization-gradient/sub-Doppler model | Phase 4 roadmap |
 | E | Vapour loading, collision loss and experiment calibration | Phase 5 roadmap |
 
@@ -71,6 +99,7 @@ Install the package and execute the committed SI-unit configuration:
 python -m pip install -r requirements-dev.txt
 python -m cold_atom_mot simulate configs/rb87_standard_mot.yaml
 python -m cold_atom_mot rate-equation configs/rb87_phase2_rate_equation.yaml
+python -m cold_atom_mot obe configs/rb87_phase3_obe.yaml
 ```
 
 The commands write `results/phase1/phase1_run.npz`, including deterministic and
@@ -84,6 +113,7 @@ Regenerate the documented reference dataset and every PNG/SVG pair with:
 ```bash
 python examples/generate_phase1_results.py
 python examples/generate_phase2_results.py
+python examples/generate_phase3_results.py
 ```
 
 ## Selected simulation results
@@ -91,6 +121,17 @@ python examples/generate_phase2_results.py
 The complete Phase-1 and Phase-2 gallery, parameters, interpretations, SVG alternatives,
 and numerical-data links are collected in **[results/README.md](results/README.md)**.
 The curated figures below provide an immediate scientific overview.
+
+### Phase-3 coherences and conditioned parameter trends
+
+| Reduced OBE response | Power–detuning damping map |
+|---|---|
+| ![Reduced OBE steady state](results/phase3/obe_steady_state.png) | ![Damping versus power and detuning](results/phase3/damping_power_detuning.png) |
+| Coherence-resolving two-state steady response. [Caption, SVG and data](results/README.md#phase-3-reduced-optical-bloch-results) | The damping optimum moves with detuning and power broadening. [Physical explanation, SVG and data](results/README.md#why-damping-can-fall-as-power-increases) |
+
+![Beam-waist force under fixed-power and fixed-intensity conditions](results/phase3/waist_conditioned_force.png)
+
+[Why the fixed-power curve is non-monotonic, with SVG and numerical data.](results/README.md#why-force-can-decrease-as-waist-increases)
 
 ### Phase-2 hyperfine populations and force
 

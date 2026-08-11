@@ -196,6 +196,62 @@ sample without a nonzero bias defining that axis.
 [Vector SVG](phase2/zeeman_populations.svg) ·
 [numerical arrays](phase2/phase2_reference.npz)
 
+## Phase-3 reduced optical-Bloch results
+
+### OBE steady state
+
+![Reduced OBE excited-state map](phase3/obe_steady_state.png)
+
+The colour map is the numerical steady excited population for the effective
+87Rb D2 stretched transition. Increasing saturation broadens the detuning range
+and drives the population toward the two-level ceiling of one half. The stored
+metadata reports the maximum difference from the exact analytical solution.
+
+[Vector SVG](phase3/obe_steady_state.svg) ·
+[numerical arrays](phase3/phase3_reference.npz) ·
+[Hamiltonian and Lindblad equation](../docs/theory.md#level-c-reduced-optical-bloch-equations)
+
+### Coherent transients
+
+![Reduced OBE transient dynamics](phase3/obe_transients.png)
+
+Starting in the ground state, the density matrix evolves at δ=−Γ. Stronger
+coupling produces visible Rabi dynamics before spontaneous decay damps the
+transient toward its stationary value. These are coherences absent from the
+Phase-2 population-only solver.
+
+[Vector SVG](phase3/obe_transients.svg) ·
+[configuration](../configs/rb87_phase3_obe.yaml)
+
+### Why damping can fall as power increases
+
+![Damping coefficient over power and detuning](phase3/damping_power_detuning.png)
+
+Power is not expected to increase damping indefinitely. More power initially
+steepens the velocity-dependent force, but saturation and power broadening flatten
+the Lorentzian slope at fixed detuning. Since β is that slope rather than total
+force, it peaks and then falls. The two-dimensional map also shows that changing
+detuning moves the optimum; a one-dimensional power scan is not universal.
+
+[Vector SVG](phase3/damping_power_detuning.svg) ·
+[numerical arrays](phase3/phase3_reference.npz) ·
+[derivation and interpretation](../docs/theory.md#why-damping-can-decrease-as-beam-power-increases)
+
+### Why force can decrease as waist increases
+
+![Force versus waist under two constraints](phase3/waist_conditioned_force.png)
+
+Both curves evaluate the restoring magnitude at x=2 mm and δ=−2Γ. At fixed
+10 mW per beam, a narrow beam has poor off-axis overlap while a wide beam loses
+peak intensity as 1/w², giving a non-monotonic optimum. The fixed-peak-intensity
+curve instead increases power as w²; remaining variation comes from Gaussian
+overlap and the other beams' shared saturation. “Force versus waist” is therefore
+undefined unless the held-fixed quantity and evaluation point are stated.
+
+[Vector SVG](phase3/waist_conditioned_force.svg) ·
+[numerical arrays](phase3/phase3_reference.npz) ·
+[physical explanation](../docs/theory.md#why-force-can-decrease-as-gaussian-waist-increases)
+
 ## Foundational-model gallery
 
 These earlier plots remain useful educational checks, but they are not outputs

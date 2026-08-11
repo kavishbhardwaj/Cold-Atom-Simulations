@@ -20,3 +20,10 @@ def test_phase2_config_rejects_negative_repump_power():
     config['repump']['power_per_beam_w'] = -1e-3
     with pytest.raises(ValueError, match="repump"):
         validate_config(config)
+
+
+def test_phase3_config_rejects_negative_saturation():
+    config = load_config('configs/rb87_phase3_obe.yaml')
+    config['obe']['saturation'] = -0.1
+    with pytest.raises(ValueError, match="saturation"):
+        validate_config(config)
