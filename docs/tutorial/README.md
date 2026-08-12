@@ -2,6 +2,10 @@
 
 This is the main technical tutorial for the repository. It explains the code as a **continuous physics calculation**, not as an API reference: what is calculated, which equations are solved, why each model was chosen, which approximations were accepted, what each result means, and how to reproduce the calculations.
 
+Every major calculation is now presented in the same scientific order: **physical question → governing equation → why this model was chosen → numerical/tool decision → approximation → generated result → interpretation → reason for the next model**. Results are therefore discussed beside the equations that produced them rather than collected only at the end.
+
+> **GitHub math note.** Display equations use GitHub-supported `$$ ... $$` math blocks and inline equations use `$ ... $`, so the mathematics should render directly in the repository.
+
 > **Scope / provenance.** This repository is independent after-hours work developed from personal scientific interest and kept as a reproducible record and backup. Laboratory control, acquisition, and other lab codes are not kept here.
 
 ## How to read it
@@ -9,11 +13,11 @@ This is the main technical tutorial for the repository. It explains the code as 
 1. [Part I — Physical system and apparatus](01_physical_system_and_apparatus.md)  
    87Rb D2 choice, hyperfine/Zeeman basis, magnetic field, coils, six physical beams, polarization and coherence.
 2. [Part II — MOT force models, OBEs, and sub-Doppler physics](02_mot_force_models_and_obes.md)  
-   Effective MOT force, multilevel rate equations, two-level and 24-state OBEs, polarization-gradient cooling, residual magnetic fields.
+   Effective MOT force, multilevel rate equations, two-level and 24-state OBEs, polarization-gradient cooling, residual magnetic fields, with the corresponding generated results placed after each calculation.
 3. [Part III — Motion, loading, and collective physics](03_motion_loading_and_collective_physics.md)  
-   Newton/RK45 trajectories, photon recoil, time sequences, vapour flux, capture, loading/loss, multiple scattering and collective MOT effects.
-4. [Part IV — Results, validation, approximations, and scope](04_results_validation_and_scope.md)  
-   What the main figures mean, the complete simulation flow, every major approximation, validation philosophy, and what is not yet claimed.
+   Newton/RK45 trajectories, photon recoil, time sequences, vapour flux, capture, loading/loss, multiple scattering and collective MOT effects, again followed immediately by their generated figures and interpretation.
+4. [Part IV — Cross-cutting interpretation, approximations, and validation](04_results_validation_and_scope.md)  
+   The complete simulation flow, every major approximation, validation philosophy, and what is not yet claimed.
 5. [Part V — From framework to digital twin: learning and reproduction](05_digital_twin_learning_and_reproduction.md)  
    Experimental inputs needed for a real digital twin, a student learning path, repository map, clean-checkout reproduction, equation-to-code map, and reproducibility checklist.
 
