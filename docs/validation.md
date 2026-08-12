@@ -155,6 +155,7 @@ different solver or apparatus model.
 | 24-state moving OBE | two-level/trace limits only | **INTERNAL TESTED** | full case **NOT YET VALIDATED** | full case **NOT YET VALIDATED** | **NOT YET VALIDATED** | **NOT YET VALIDATED** |
 | Adiabatic population PGC | limiting formulas | **INTERNAL TESTED** | not comparable | not compared | **LITERATURE-TREND VERIFIED** | **NOT YET VALIDATED** |
 | MOT/loading predictions | component formulas | **INTERNAL TESTED** | not compared | simple normalized force only | qualitative | **EXPERIMENTALLY COMPARED; not quantitatively reproduced** |
+| Gaussian collective MOT / multiple scattering | Gaussian integrals and low-density limit | **INTERNAL TESTED** | not applicable | not compared | **LITERATURE-TREND VERIFIED** | **NOT YET VALIDATED** |
 
 ### QuTiP methodology and errors
 

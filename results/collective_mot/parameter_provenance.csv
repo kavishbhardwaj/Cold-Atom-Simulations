@@ -1,0 +1,7 @@
+parameter,value,provenance
+sigma0,2.90669293772051e-13,calculated atomic wavelength
+sigma_laser,5.509294996536348e-15,calculated two-level detuning/saturation
+sigma_reabsorption,2.90669293772051e-13,user scenario: resonant upper reference
+beta,1e-16,user sensitivity scenario; not default
+temperature,0.00015,user supplied
+kappa,2e-19,user supplied

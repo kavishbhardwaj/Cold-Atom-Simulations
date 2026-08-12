@@ -43,6 +43,7 @@ and [validation](docs/validation.md).
 Time-dependent laboratory controls are described in [experimental sequences](docs/experimental_sequences.md).
 Independent physical beams and Jones optics are described in [six-beam apparatus](docs/six_beam_apparatus.md).
 Bias compensation, coil imperfections, and switching fields are described in [magnetic apparatus](docs/magnetic_apparatus.md).
+Optional Gaussian-cloud loading, shadowing, and multiple scattering are described in [collective MOT physics](docs/collective_mot.md).
 
 ## Validation status
 
