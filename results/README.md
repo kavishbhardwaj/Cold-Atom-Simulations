@@ -80,6 +80,29 @@ The first plot demonstrates that scattering can rise while the velocity slope
 β falls after saturation/power broadening. The second is a finite speed-grid
 acceptance proxy, not a steady atom-number prediction.
 
+## Vapour capture, loading, and loss
+
+Generated with `python examples/generate_capture_loading_results.py` from the
+effective 87Rb D2 force and `configs/rb_vapor_loading.yaml`.
+
+| Vapour pressure and trajectory-derived loading | Loading-loss sensitivity |
+|---|---|
+| ![Vapour capture and loading](capture_loading/vapor_capture_loading.png) | ![Loading curves](capture_loading/loading_loss_sensitivity.png) |
+| [SVG](capture_loading/vapor_capture_loading.svg) | [SVG](capture_loading/loading_loss_sensitivity.svg) |
+
+![Stratified capture sampling convergence](capture_loading/capture_sampling_convergence.png)
+
+[Convergence SVG](capture_loading/capture_sampling_convergence.svg)
+
+[Numerical data and metadata](capture_loading/capture_loading_reference.npz).
+The incident ensemble uses the surface-flux speed law and cosine angular law,
+with stratification to resolve the rare slow tail. The capture sphere is an
+acceptance boundary rather than a chamber model. Speeds above 80 m/s are assigned
+zero capture after the simulated 20–80 m/s bins show the cutoff; the omitted
+high-speed flux probability remains stored. Background and hot-Rb loss rates are
+independent calibrated inputs. The plotted atom numbers are scenarios, not an
+experimentally validated population prediction.
+
 ## Cold-atom foundations
 
 | Dipole potential | Gaussian propagation |

@@ -35,7 +35,7 @@ are not faked here. See [atomic systems](docs/atomic_systems.md).
 | Sparse multilevel OBE | Generated Hamiltonian/collapse operators; expensive full six-beam validation remains |
 | Polarization-gradient model | Phase/coherence-group-resolved light shifts, pumping and Sisyphus force; populations only |
 | Photon-event Monte Carlo | Exact ≥1 Poisson-event probability per step, absorption and spontaneous recoil |
-| Capture and loading/loss | Explicit trajectory criterion plus sourced vapour density and user-supplied loss inputs |
+| Capture and loading/loss | Thermal surface-flux trajectories, isotope-resolved loading, and calibrated loss inputs |
 
 Detailed equations and boundaries: [model hierarchy](docs/model_hierarchy.md),
 [cooling physics](docs/cooling_physics.md), [numerics](docs/numerical_methods.md),
@@ -55,6 +55,10 @@ and [validation](docs/validation.md).
 |---|---|
 | ![Coil field](results/effective_mot/antihelmholtz_field.png) | ![Trajectories](results/effective_mot/deterministic_trajectories.png) |
 
+| Vapour capture and loading | Loading-loss sensitivity |
+|---|---|
+| ![Vapour pressure, capture, and loading](results/capture_loading/vapor_capture_loading.png) | ![Loading curves under calibrated loss rates](results/capture_loading/loading_loss_sensitivity.png) |
+
 All captions, held-fixed parameters, SVG alternatives, NPZ data and limitations
 are in the **[results gallery](results/README.md)**.
 
@@ -66,6 +70,7 @@ python -m cold_atom_mot simulate configs/rb87_d2_mot.yaml
 python -m cold_atom_mot rate-equation configs/rb87_d2_multilevel.yaml
 python -m cold_atom_mot obe configs/rb87_d2_two_level_obe.yaml
 python -m cold_atom_mot subdoppler configs/rb87_d2_polarization_gradient.yaml
+python -m cold_atom_mot loading configs/rb_vapor_loading.yaml
 
 python examples/generate_foundations.py
 python examples/generate_effective_mot_results.py
@@ -73,6 +78,7 @@ python examples/generate_multilevel_results.py
 python examples/generate_optical_bloch_results.py
 python examples/generate_polarization_gradient_results.py
 python examples/generate_parameter_studies.py
+python examples/generate_capture_loading_results.py
 ```
 
 ## Package map

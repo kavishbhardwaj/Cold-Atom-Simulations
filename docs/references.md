@@ -31,7 +31,8 @@ that constants and equations can be audited.
 8. B. P. Anderson and M. A. Kasevich, “Loading a vapor-cell magneto-optic trap
    using light-induced atom desorption,” *Physical Review A* **63**, 023404
    (2001), <https://doi.org/10.1103/PhysRevA.63.023404>. Context for the future
-   loading model only; the effective model predicts neither loading rate nor atom number.
+   vapour-cell loading context and the distinction between loading and loss;
+   no numerical coefficient is copied or inferred without an explicit input.
 9. A. R. Edmonds, *Angular Momentum in Quantum Mechanics*, 2nd ed. (Princeton
    University Press, 1960), <https://doi.org/10.1515/9781400884186>. angular-momentum convention used to generate the multilevel Clebsch–Gordan factors.
 10. D. A. Steck, *Rubidium 85 D Line Data*, revision 2.3.2 (2021),

@@ -84,3 +84,18 @@ physical stationary populations; finite state-resolved shifts and forces; the
 expected axial Zeeman spacing; and force convergence under grid refinement.
 These are internal checks, not PyLCP or experimental validation. A multilevel
 OBE retaining ground coherences is the next external-validation gate.
+
+## Vapour, capture, and loading checks
+
+- the surface-flux speed sampler reproduces its analytical mean;
+- all sampled spherical trajectories point inward and fixed seeds reproduce;
+- stratified sample weights equal their analytical flux probabilities;
+- loading rate equals incident isotope flux times weighted capture probability;
+- rubidium partial pressure and non-Rb background pressure remain independent;
+- the one-sided flux equals `n<v>/4`;
+- zero-loss and one-body loading equations reproduce their analytical limits;
+- two-body loss is rejected without a positive effective volume.
+
+These tests validate sampling and bookkeeping, not collision cross sections or
+an experimental loading rate. The acceptance surface and effective loss inputs
+must be matched to an apparatus before quantitative comparison.

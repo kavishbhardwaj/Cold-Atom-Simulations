@@ -15,3 +15,9 @@ validated.
 
 `quick` means CI-scale deterministic grids. `research` means users must refine
 basis, optical phases, OBE tolerances, spatial grids, atom count and timestep.
+
+Vapour loading combines the effective force with a thermal surface-flux capture
+calculation. It is a higher-level application of the same force—not a separate
+kind of MOT physics. The result becomes quantitatively predictive only after the
+acceptance surface, chamber geometry, background collision loss, hot-Rb loss,
+and any density-dependent loss have been calibrated or independently sourced.

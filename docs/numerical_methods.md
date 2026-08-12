@@ -95,3 +95,20 @@ background pressure. The loading integrator accepts, but never invents, a
 trajectory/geometry-derived loading rate, a calibrated one-body loss rate, and
 an optional phenomenological two-body coefficient/effective volume. No committed
 curve is presented as a calibrated atom-number prediction.
+
+Atoms incident on the spherical acceptance boundary are sampled from the
+one-sided equilibrium flux. The total flux per unit area is
+`n sqrt(k_B T/(2 pi m)) = n <v>/4`; its speed distribution is proportional to
+`v^3 exp[-m v^2/(2 k_B T)]`, not the bulk Maxwell `v^2` law. Incidence angles
+follow the cosine law. Configurable speed strata resolve the extremely rare
+slow tail without pretending a small unstratified sample can measure it. Each
+stratum carries its exact flux-CDF probability, and the result stores the
+unmodelled probability above the final speed edge.
+
+The capture criterion requires an atom to remain inside the specified radius
+and below the speed threshold for the configured dwell time. Multiplying its
+weighted probability by isotope-specific incident flux produces `R`. The loading
+ODE then uses independently configured one-body background/hot-Rb losses and an
+optional phenomenological two-body coefficient. A kinetic background-loss mode
+is available only when the user supplies gas mass and an effective ejection
+cross section.

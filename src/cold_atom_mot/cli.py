@@ -5,11 +5,13 @@ import json
 from pathlib import Path
 import numpy as np
 from . import __version__
-from .io.config import build_effective_model, build_multilevel_model, build_subdoppler_model, load_config
+from .io.config import build_effective_model, build_multilevel_model, build_subdoppler_model, build_vapor_state, load_config
 from .solvers.deterministic import integrate_trajectory
 from .solvers.monte_carlo import simulate_photon_events
 from .atomic.species import get_atomic_line
 from .physics.optical_bloch import TwoLevelOBE
+from .simulation.capture import CaptureCriterion, estimate_stratified_vapor_capture_rate
+from .vacuum import background_collision_loss_rate_s, loading_curve
 
 
 def simulate(config_path: str) -> None:
@@ -107,6 +109,76 @@ def subdoppler(config_path: str) -> None:
     print(path)
 
 
+def vapor_loading(config_path: str) -> None:
+    """Estimate trajectory-linked vapour loading and apply configured losses."""
+    config = load_config(config_path)
+    mot_path = Path(config_path).resolve().parents[1] / config["mot_config"]
+    force_model = build_effective_model(load_config(mot_path))
+    vapor = build_vapor_state(config)
+    capture = config["capture"]
+    criterion = CaptureCriterion(**capture["criterion"])
+    estimate = estimate_stratified_vapor_capture_rate(
+        force_model,
+        vapor,
+        criterion,
+        capture_surface_radius_m=capture["surface_radius_m"],
+        speed_bin_edges_m_s=capture["speed_bin_edges_m_s"],
+        atoms_per_bin=capture["atoms_per_bin"],
+        max_step_s=capture["max_step_s"],
+        seed=capture["seed"],
+    )
+    loss = config["loading"]
+    background_loss = loss["background_one_body_loss_s"]
+    collision = loss.get("background_collision_model")
+    if collision is not None:
+        background_loss = background_collision_loss_rate_s(
+            vapor.background_gas_pressure_pa,
+            vapor.temperature_k,
+            force_model.atom.mass_kg,
+            collision["particle_mass_kg"],
+            collision["effective_loss_cross_section_m2"],
+        )
+    one_body_loss = background_loss + loss["hot_rb_one_body_loss_s"]
+    time = np.linspace(0, loss["curve_duration_s"], loss["curve_points"])
+    atom_number = loading_curve(
+        time,
+        estimate.loading_rate_s,
+        one_body_loss,
+        two_body_coefficient=loss["two_body_loss_m3_s"],
+        effective_volume_m3=loss["effective_volume_m3"],
+    )
+    metadata = {
+        "simulation_version": __version__,
+        "config": config,
+        "units": {"speed": "m/s", "time": "s", "loading_rate": "atoms/s"},
+        "solver": "stratified thermal-flux deterministic capture plus loading ODE",
+        "limitations": "capture surface is an acceptance boundary; loss inputs require calibration",
+    }
+    output = Path(config["output"]["directory"])
+    output.mkdir(parents=True, exist_ok=True)
+    path = output / "vapor_loading_run.npz"
+    np.savez_compressed(
+        path,
+        initial_speed_m_s=estimate.initial_speed_m_s,
+        captured=estimate.captured,
+        sample_weight=estimate.sample_weights,
+        capture_time_s=estimate.capture_time_s,
+        capture_probability=estimate.capture_probability,
+        capture_probability_standard_error=estimate.capture_probability_standard_error,
+        incident_flux_s=estimate.incident_flux_s,
+        loading_rate_s=estimate.loading_rate_s,
+        omitted_high_speed_probability=estimate.omitted_high_speed_probability,
+        time_s=time,
+        atom_number=atom_number,
+        rb_partial_pressure_pa=vapor.rb_partial_pressure_pa,
+        background_gas_pressure_pa=vapor.background_gas_pressure_pa,
+        background_one_body_loss_s=background_loss,
+        total_one_body_loss_s=one_body_loss,
+        metadata_json=json.dumps(metadata, sort_keys=True),
+    )
+    print(path)
+
+
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(prog="cold-atom-mot")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -118,6 +190,8 @@ def main(argv=None) -> None:
     obe_parser.add_argument("config")
     pgc_parser = subparsers.add_parser("subdoppler")
     pgc_parser.add_argument("config")
+    loading_parser = subparsers.add_parser("loading")
+    loading_parser.add_argument("config")
     args = parser.parse_args(argv)
     if args.command == "simulate":
         simulate(args.config)
@@ -127,3 +201,5 @@ def main(argv=None) -> None:
         optical_bloch(args.config)
     elif args.command == "subdoppler":
         subdoppler(args.config)
+    elif args.command == "loading":
+        vapor_loading(args.config)

@@ -1,11 +1,28 @@
 model: configurable_vapor_loading
+mot_config: configs/rb87_d2_mot.yaml
 vacuum:
   cell_temperature_k: 300.0
   rb_partial_pressure_pa: null  # null selects the cited vapour-pressure fit
   background_gas_pressure_pa: 1.0e-7
   isotope_fractions: {85Rb: 0.7217, 87Rb: 0.2783}
+capture:
+  surface_radius_m: 0.006
+  speed_bin_edges_m_s: [0.0, 5.0, 10.0, 20.0, 40.0, 80.0]
+  atoms_per_bin: 24
+  seed: 20260812
+  max_step_s: 5.0e-5
+  criterion:
+    radius_m: 0.002
+    speed_m_s: 0.5
+    duration_s: 0.008
+    dwell_s: 0.0005
 loading:
-  loading_rate_atoms_s: 1.0e6  # placeholder input requiring trajectory/geometry calibration
-  one_body_loss_s: 0.1         # experiment-specific input; not inferred from pressure
+  background_one_body_loss_s: 0.1  # calibrated input; not inferred from pressure alone
+  hot_rb_one_body_loss_s: 0.0       # independent calibrated input
+  background_collision_model: null # or {particle_mass_kg, effective_loss_cross_section_m2}
   two_body_loss_m3_s: 0.0      # phenomenological; no default literature claim
   effective_volume_m3: 1.0e-9
+  curve_duration_s: 30.0
+  curve_points: 151
+output:
+  directory: results/capture_loading
