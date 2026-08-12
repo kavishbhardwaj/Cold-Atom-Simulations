@@ -114,3 +114,30 @@ must be matched to an apparatus before quantitative comparison.
 - the vector Hamiltonian is Hermitian and continuous through `B=0`;
 - larger fields resolve a nonlinear departure from `g_F m_F mu_B B`;
 - the transverse-field multilevel Liouvillian remains trace preserving.
+
+## Residual fields and polarization-gradient cooling
+
+The former axial residual-field scan is not a vector-field validation.  Its
+five-population adiabatic model projects B onto a fixed quantization axis and
+now rejects transverse B.  It reports a matched recoil-event diffusion tensor
+(directional absorption plus isotropic emission), but omits internal-state and
+dipole-force fluctuations; consequently no Einstein temperature is claimed.
+
+The companion full-vector 24-state OBE scan covers 0, 0.1, 0.3, 1, 3, 10, 30,
+100, 300 and 1000 mG independently along x, y and z.  These equal 0--100 µT or
+0--1e-4 T; an Earth-scale 500 mG reference is marked.  For F=2, the Larmor scale
+is 699.6 Hz/mG, while the weak-drive optical-pumping estimate for the explicitly
+configured -3 Gamma, s=0.08 recipe is 6.56 kHz.  Thus the scales cross near
+9.4 mG, but this is a competition-of-rates marker, **not** a measured 10%
+friction threshold.
+
+The static OBE scan retains vector Zeeman mixing, optical coherences, full
+excited hyperfine structure and branching.  It finds orientation-dependent
+density-matrix coherences, but symmetry makes Fx(v=0) vanish.  A defensible
+beta(B) requires long-time moving-lattice calculations at both velocity signs;
+a defensible temperature additionally requires internal/dipole-force noise from
+the same OBE.  Neither is inferred from the present point scan.  Dalibard and
+Cohen-Tannoudji, JOSA B **6**, 2023 (1989), DOI 10.1364/JOSAB.6.002023, provides
+the primary theoretical context that magnetic precession disrupts Sisyphus
+optical pumping. Geometry and atomic assumptions are not matched, so the
+comparison is qualitative and parameters were not fitted.

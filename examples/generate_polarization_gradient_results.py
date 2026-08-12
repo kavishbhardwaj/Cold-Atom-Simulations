@@ -82,7 +82,7 @@ def main():
         for j, detuning in enumerate(detunings):
             beta_grid[i, j] = build(saturation, detuning).friction_coefficient(probe_velocity, periods=8, discard=4, steps_per_period=28)
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.7))
-    axes[0].plot(biases * 1e6, bias_beta * 1e23, "o-"); axes[0].set(xlabel="Axial residual field (µT)", ylabel="Friction β ($10^{-23}$ kg/s)", title="Residual-field sensitivity")
+    axes[0].plot(biases * 1e6, bias_beta * 1e23, "o-"); axes[0].set(xlabel="Projected Bz (µT)", ylabel="Friction β ($10^{-23}$ kg/s)", title="Legacy axial population model (not vector B)")
     image = axes[1].pcolormesh(detunings, saturations, beta_grid * 1e23, shading="nearest", cmap="coolwarm")
     fig.colorbar(image, ax=axes[1], label="β ($10^{-23}$ kg/s)"); axes[1].set(xlabel="Detuning (Γ)", ylabel="Saturation per beam", title="Intensity–detuning dependence")
     save("subdoppler_sensitivities")
@@ -94,19 +94,20 @@ def main():
     save("subdoppler_convergence")
 
     beta = model.friction_coefficient(probe_velocity, periods=14, discard=7, steps_per_period=48)
-    diffusion = model.diffusion_estimate()
-    temperature = diffusion / (k_B * beta) if beta > 0 else np.nan
+    diffusion_tensor = model.recoil_diffusion_tensor()
     metadata = {"simulation_version": __version__, "model_fidelity": "Polarization-gradient model adiabatic F=2 to F'=3 population Sisyphus model",
                 "isotope": "87Rb", "line": "D2", "detuning_gamma": -3, "saturation_per_beam": .08,
                 "phases_rad": PHASES.tolist(), "periods": 12, "discard_periods": 6,
-                "temperature_warning": "Einstein estimate only; diffusion is isotropic recoil approximation and not an experimental prediction."}
+                "magnetic_field_warning": "Axial projected-field population model only. It excludes transverse coherences and cannot establish a vector residual-field threshold.",
+                "diffusion_fidelity": "Absorption shot noise plus isotropic spontaneous recoil within the adiabatic population model; excludes internal-state and dipole-force fluctuations. No temperature is inferred."}
     np.savez_compressed(OUTPUT / "polarization_gradient_reference.npz", x_m=x, polarization_minus=fractions[-1], polarization_pi=fractions[0],
                         polarization_plus=fractions[1], light_shifts_j=shifts, populations=populations,
                         velocity_m_per_s=velocities, pg_force_n=pg_force, doppler_force_n=d_force,
                         bias_t=biases, bias_friction_kg_per_s=bias_beta, detuning_gamma=detunings,
                         saturation_per_beam=saturations, friction_grid_kg_per_s=beta_grid,
-                        convergence_steps=steps, convergence_force_n=convergence, diffusion_kg2_m2_per_s3=diffusion,
-                        einstein_temperature_k=temperature, metadata_json=json.dumps(metadata, sort_keys=True))
+                        convergence_steps=steps, convergence_force_n=convergence,
+                        recoil_diffusion_tensor_kg2_m2_per_s3=diffusion_tensor,
+                        metadata_json=json.dumps(metadata, sort_keys=True))
 
 
 if __name__ == "__main__": main()

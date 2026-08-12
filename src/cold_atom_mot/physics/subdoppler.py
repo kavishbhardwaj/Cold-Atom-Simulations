@@ -70,7 +70,8 @@ class PolarizationGradientModel:
     excited_m = np.arange(-3, 4)
 
     def __init__(self, basis: AtomicBasis, ground_f, excited_f, detuning, beams,
-                 magnetic_field_t=(0.0, 0.0, 0.0), quantization_axis=(0.0, 0.0, 1.0)):
+                 magnetic_field_t=(0.0, 0.0, 0.0), quantization_axis=(0.0, 0.0, 1.0),
+                 *, allow_projected_field=False):
         if detuning == 0:
             raise ValueError("detuning must be non-zero")
         self.basis, self.line = basis, basis.line
@@ -78,6 +79,10 @@ class PolarizationGradientModel:
         self.beams = tuple(beams)
         self.magnetic_field_t = np.asarray(magnetic_field_t, float)
         self.quantization_axis = unit(quantization_axis)
+        transverse = self.magnetic_field_t - np.dot(self.magnetic_field_t, self.quantization_axis)*self.quantization_axis
+        if np.linalg.norm(transverse) > 1e-15 and not allow_projected_field:
+            raise ValueError("population PGC model supports only B parallel to its fixed quantization axis; use MultilevelOBE for vector B")
+        self.allow_projected_field = allow_projected_field
         selected_ground = [(i,s) for i,s in enumerate(basis.ground) if s.F == ground_f]
         selected_excited = [(i,s) for i,s in enumerate(basis.excited) if s.F == excited_f]
         self.ground_m = np.array([s.m for _,s in selected_ground]); self.excited_m = np.array([s.m for _,s in selected_excited])
@@ -206,12 +211,26 @@ class PolarizationGradientModel:
         force_minus = self.moving_average_force(-abs(velocity), **kwargs)
         return -(force_plus - force_minus) / (2 * abs(velocity))
 
-    def diffusion_estimate(self):
-        """Isotropic absorption+emission recoil estimate, not a full tensor."""
+    def recoil_diffusion_tensor(self):
+        """Matched recoil-event tensor for this population model.
+
+        Includes absorption shot noise from the configured beam directions and
+        isotropic spontaneous emission. It excludes internal-state and dipole-
+        force fluctuations, so it must not be combined with coherent-OBE
+        friction to claim a quantitative temperature.
+        """
         positions = np.linspace(0, 2 * np.pi / self.wave_number, 80, endpoint=False)
         rates = []
         for x in positions:
             p = self.stationary_populations([x, 0, 0])
             rates.append(np.dot(self.scattering_rates([x, 0, 0]), p))
         scattering = np.mean(rates)
-        return (hbar * self.wave_number) ** 2 * scattering * (1 + 1 / 3) / 2
+        weights = np.asarray([beam.saturation for beam in self.beams], float)
+        weights /= weights.sum()
+        absorption = sum(weight*np.outer(beam.direction, beam.direction)
+                         for weight, beam in zip(weights, self.beams))
+        return (hbar*self.wave_number)**2*scattering*(absorption+np.eye(3)/3)/2
+
+    def diffusion_estimate(self):
+        """Legacy scalar D_xx from :meth:`recoil_diffusion_tensor`."""
+        return self.recoil_diffusion_tensor()[0, 0]

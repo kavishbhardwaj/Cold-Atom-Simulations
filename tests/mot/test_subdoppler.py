@@ -43,6 +43,18 @@ def test_residual_axial_field_gives_correct_zeeman_spacing():
     assert np.diff(difference)[0] > 0
 
 
+def test_population_model_refuses_to_misrepresent_transverse_vector_field():
+    with pytest.raises(ValueError, match="MultilevelOBE"):
+        model(magnetic_field_t=[1e-6, 0, 0])
+
+
+def test_recoil_diffusion_tensor_is_symmetric_positive_but_explicitly_limited():
+    tensor = model().recoil_diffusion_tensor()
+    np.testing.assert_allclose(tensor, tensor.T)
+    assert np.linalg.eigvalsh(tensor).min() > 0
+    assert tensor.shape == (3, 3)
+
+
 def test_velocity_force_and_resolution_refinement_converge():
     pgc = model()
     coarse = pgc.moving_average_force(0.03, periods=8, discard=4, steps_per_period=24)
