@@ -82,6 +82,11 @@ def build_multilevel_model(config: dict) -> MultilevelRateEquationMOT:
     atom = get_atomic_line(atom_config.get("isotope", "87Rb"), atom_config.get("line", "D2"))
     if not atom.rate_equation_mot or atom.cooling_transition is None:
         raise ValueError(f"rate-equation MOT is not supported for {atom.isotope} {atom.line}")
+    for section, transition in (("laser", atom.cooling_transition), ("repump", atom.repump_transition)):
+        expected=f"f{transition[0]}_to_fprime{transition[1]}"
+        configured=config[section].get("target_transition",expected).lower()
+        if configured != expected:
+            raise ValueError(f"{atom.isotope} {atom.line} {section} requires {expected}, not {configured}")
     magnetic = config["magnetic_field"]
     field = CompositeField((
         IdealQuadrupole(magnetic["radial_gradient_t_per_m"]),
@@ -112,7 +117,7 @@ def build_multilevel_model(config: dict) -> MultilevelRateEquationMOT:
 
 def build_subdoppler_model(config: dict) -> PolarizationGradientModel:
     """Build the explicitly phase-coherent polarization-gradient F=2 -> F'=3 model."""
-    atom = Rb87D2(); laser = config["laser"]
+    atom_config=config["atom"]; atom=get_atomic_line(atom_config["isotope"],atom_config["line"]); laser = config["laser"]
     groups = laser.get("coherence_groups", ["all"] * 6)
     beams = coherent_six_beam_field(atom.wave_number_rad_m, laser["saturation_per_beam"], laser["phases_rad"], groups)
     ground_f, excited_f = atom.cooling_transition

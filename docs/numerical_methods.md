@@ -2,18 +2,18 @@
 
 ## Units and configuration
 
-Calculations use SI units internally.  `configs/rb87_standard_mot.yaml` records
-the Level-A quick-run parameters and fixed seed.  YAML validation rejects
+Calculations use SI units internally.  `configs/rb87_d2_mot.yaml` records
+the effective quick-run parameters and fixed seed.  YAML validation rejects
 negative power, non-positive waist, missing sections and non-positive time
 scales.  `configs/rb87_misaligned_coils.yaml` records a separate physical coil
 geometry study.  A production coil configuration will be integrated into the
-CLI after Phase-1 convergence and performance profiling.
+CLI after effective-model convergence and performance profiling.
 
 ## Deterministic integration
 
 `scipy.integrate.solve_ivp` with adaptive RK45 is used with configurable
 `rtol`, `atol` and maximum step.  The maximum step resolves the mechanical
-motion; optical excitation is adiabatically eliminated in Level A, so RK45 does
+motion; optical excitation is adiabatically eliminated in effective, so RK45 does
 not resolve the 26 ns lifetime.
 
 ## Biot–Savart quadrature
@@ -34,7 +34,7 @@ explicit seed makes every run reproducible.
 
 ## Stored results
 
-`results/phase1/phase1_reference.npz` stores arrays used by the figures plus a
+`results/effective_mot/effective_mot_reference.npz` stores arrays used by the figures plus a
 JSON metadata record containing configuration, units, solver, model fidelity,
 seed, step, atom count and package version.  PNG and SVG files are generated
 from the same Matplotlib figure object.  PNG is the GitHub display format; SVG
@@ -42,13 +42,13 @@ is the document/vector alternative.
 
 ## Quick and research modes
 
-Only `quick` is operational in Phase 1 and is suitable for CI-scale regression.
+Only `quick` is operational in the effective model and is suitable for CI-scale regression.
 A future `research` profile will increase ensemble size, coil segmentation and
 scan resolution only after convergence is demonstrated.  Naming an expensive
 profile without implementing its error controls would be misleading, so no
 inactive research config is shipped yet.
 
-## Level-B stationary rate equations
+## rate-equation stationary rate equations
 
 The 24×24 population generator uses a column convention, `dp/dt=A p`. Every
 optical and decay process is inserted as equal source/sink terms, and tests
@@ -60,7 +60,7 @@ normalization and negative population.
 The reference position/velocity scans solve this system independently at every
 point; no previous solution is used as an initial guess. This is slower than an
 adiabatic table interpolation but makes the committed data straightforward to
-reproduce. Phase 2 remains a stationary-internal-state approximation: it assumes
+reproduce. the multilevel model remains a stationary-internal-state approximation: it assumes
 internal populations relax faster than external motion. A future time-dependent
 population integrator must test that separation where it is not valid.
 
@@ -70,10 +70,28 @@ The stationary two-state OBE is solved as a 4×4 complex Liouvillian null proble
 with one row replaced by `Tr(ρ)=1`. Time-dependent density matrices are packed
 into eight real variables and integrated with adaptive RK45. Configurable
 `rtol`, `atol` and maximum step are expressed relative to the lifetime in the
-Phase-3 YAML file. Tests compare two tolerance/step settings and require their
+two-level OBE YAML file. Tests compare two tolerance/step settings and require their
 final density matrices to converge.
 
 The committed power–detuning map varies both parameters instead of presenting a
 single unexplained power trace. The waist figure presents fixed-power and
 fixed-peak-intensity conditions at the same x=2 mm evaluation point. All arrays
-and the held-fixed choices are stored in `results/phase3/phase3_reference.npz`.
+and the held-fixed choices are stored in `results/optical_bloch/optical_bloch_reference.npz`.
+
+## Phase-resolved population dynamics
+
+polarization-gradient integrates five ground populations with adaptive RK45 along `x=v t`.
+Interference with transverse beams makes the general six-beam field periodic
+over one wavelength, so averages use complete λ periods and discard the first
+half. The committed convergence scan refines 20–80 samples per period. Numerical
+light-shift gradients use `2e-5/k`. Phase, detuning, saturation and uniform field
+are stored in YAML and NPZ metadata.
+
+## Vapour loading and loss
+
+Rubidium partial pressure is either supplied directly or obtained from the cited
+Alcock fit; ideal-gas density is `P_Rb/(k_B T)`. This is distinct from non-Rb
+background pressure. The loading integrator accepts, but never invents, a
+trajectory/geometry-derived loading rate, a calibrated one-body loss rate, and
+an optional phenomenological two-body coefficient/effective volume. No committed
+curve is presented as a calibrated atom-number prediction.

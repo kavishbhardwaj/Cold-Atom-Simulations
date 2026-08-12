@@ -24,12 +24,20 @@ class MultilevelOBE:
     def hamiltonian(self, position, velocity=(0,0,0), time=0.0):
         n=len(self.basis.ground)+len(self.basis.excited); ng=len(self.basis.ground)
         h=np.zeros((n,n),complex); b=np.asarray(self.magnetic_field.field(position,time)); bmag=np.linalg.norm(b)
-        for i,state in enumerate(self.basis.ground): h[i,i]=2*np.pi*state.frequency_offset_hz+MU_B/hbar*state.g_factor*state.m*bmag
+        rotating_ground={}
+        for family in self.beam_families:
+            target=next(e.frequency_offset_hz for e in self.basis.excited if e.F==family.target_excited_f)
+            value=2*np.pi*target+family.beam.detuning+family.beam.frequency_offset
+            previous=rotating_ground.setdefault(family.ground_f,value)
+            if not np.isclose(previous,value):
+                raise ValueError("multilevel OBE requires one optical frequency per ground manifold")
+        for i,state in enumerate(self.basis.ground):
+            rotating=rotating_ground.get(state.F,2*np.pi*state.frequency_offset_hz)
+            h[i,i]=rotating+MU_B/hbar*state.g_factor*state.m*bmag
         for i,state in enumerate(self.basis.excited): h[ng+i,ng+i]=2*np.pi*state.frequency_offset_hz+MU_B/hbar*state.g_factor*state.m*bmag
         for family in self.beam_families:
             axis=b/bmag if bmag>1e-12 else np.array([0.,0.,1.]); fractions=spherical_fractions(family.beam.polarization,axis)
             s=float(family.beam.intensity(position)/self.basis.line.saturation_intensity_w_m2)
-            target=next(e.frequency_offset_hz for e in self.basis.excited if e.F==family.target_excited_f)
             for transition in self.basis.transitions:
                 g=self.basis.ground[transition.ground_index]; e=self.basis.excited[transition.excited_index]
                 if g.F != family.ground_f: continue
@@ -38,7 +46,6 @@ class MultilevelOBE:
                 coupling=.5*omega*np.exp(1j*optical_phase)
                 h[ng+transition.excited_index,transition.ground_index]+=coupling
                 h[transition.ground_index,ng+transition.excited_index]+=np.conjugate(coupling)
-                h[ng+transition.excited_index,ng+transition.excited_index] += -(family.beam.detuning+2*np.pi*target)/max(1,len(self.beam_families))
         return h
 
     def collapse_operators(self):

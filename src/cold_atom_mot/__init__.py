@@ -1,9 +1,7 @@
-"""Fidelity-labelled 3D 87Rb magneto-optical-trap simulation framework.
+"""Unified rubidium cold-atom and magneto-optical-trap simulation framework.
 
-Implemented levels include effective semiclassical/stochastic dynamics,
-multilevel population rates, a reduced two-state OBE, and an adiabatic
-phase-resolved polarization-gradient model. No full multilevel OBE or calibrated
-experiment model is claimed.
+Atomic structure supports 85Rb/87Rb D1/D2. Available dynamics range from
+analytical/effective models through multilevel rates, sparse OBE operators,
+polarization-gradient populations, trajectories, recoil and loading utilities.
 """
-
-__version__ = "0.4.0"
+__version__ = "0.5.0"

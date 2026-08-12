@@ -15,21 +15,21 @@ def test_standard_config_loads():
     assert config['monte_carlo']['seed'] == 20260811
 
 
-def test_phase2_config_rejects_negative_repump_power():
+def test_multilevel_config_rejects_negative_repump_power():
     config = load_config('configs/rb87_d2_multilevel.yaml')
     config['repump']['power_per_beam_w'] = -1e-3
     with pytest.raises(ValueError, match="repump"):
         validate_config(config)
 
 
-def test_phase3_config_rejects_negative_saturation():
+def test_obe_config_rejects_negative_saturation():
     config = load_config('configs/rb87_d2_two_level_obe.yaml')
     config['obe']['saturation'] = -0.1
     with pytest.raises(ValueError, match="saturation"):
         validate_config(config)
 
 
-def test_phase4_configuration_loads_and_rejects_missing_phase():
+def test_polarization_gradient_configuration_loads_and_rejects_missing_phase():
     config = load_config("configs/rb87_d2_polarization_gradient.yaml")
     assert config["model"] == "polarization_gradient"
     config["laser"]["phases_rad"] = config["laser"]["phases_rad"][:-1]

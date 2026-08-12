@@ -100,7 +100,7 @@ def subdoppler(config_path: str) -> None:
     metadata = {"simulation_version": __version__, "config": config,
                 "units": {"velocity": "m/s", "force": "N", "friction": "kg/s"},
                 "solver": "adiabatically eliminated F=2 to Fprime=3 optical-pumping trajectory",
-                "model_fidelity": "Polarization-gradient model phase-resolved population Sisyphus model"}
+                "model_fidelity": "phase-resolved adiabatic population Sisyphus model"}
     path = output / "polarization_gradient_run.npz"
     np.savez_compressed(path, velocity_m_per_s=velocity, force_x_n=force,
                         friction_kg_per_s=friction, metadata_json=json.dumps(metadata))
@@ -112,12 +112,12 @@ def main(argv=None) -> None:
     subparsers = parser.add_subparsers(dest="command", required=True)
     command = subparsers.add_parser("simulate")
     command.add_argument("config")
-    level_b = subparsers.add_parser("rate-equation")
-    level_b.add_argument("config")
-    level_c = subparsers.add_parser("obe")
-    level_c.add_argument("config")
-    level_d = subparsers.add_parser("subdoppler")
-    level_d.add_argument("config")
+    rate_parser = subparsers.add_parser("rate-equation")
+    rate_parser.add_argument("config")
+    obe_parser = subparsers.add_parser("obe")
+    obe_parser.add_argument("config")
+    pgc_parser = subparsers.add_parser("subdoppler")
+    pgc_parser.add_argument("config")
     args = parser.parse_args(argv)
     if args.command == "simulate":
         simulate(args.config)

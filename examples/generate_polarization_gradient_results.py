@@ -6,13 +6,12 @@ import numpy as np
 from scipy.constants import hbar, k as k_B
 
 from cold_atom_mot import __version__
-from cold_atom_mot.atomic.rb87 import Rb87D2
-from cold_atom_mot.atomic.species import build_atomic_basis
+from cold_atom_mot.atomic.species import build_atomic_basis, get_atomic_line
 from cold_atom_mot.physics.subdoppler import coherent_six_beam_field, PolarizationGradientModel
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "results" / "polarization_gradient"
-ATOM = Rb87D2()
+ATOM = get_atomic_line("87Rb", "D2")
 PHASES = np.array([0, 0, 0, np.pi / 2, 0, np.pi / 4])
 
 

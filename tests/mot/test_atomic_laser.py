@@ -1,15 +1,15 @@
 import numpy as np
 import pytest
 from scipy.integrate import quad
-from cold_atom_mot.atomic.rb87 import Rb87D2
+from cold_atom_mot.atomic.species import get_atomic_line
 from cold_atom_mot.laser.beam import GaussianBeam, six_beam_mot
 from cold_atom_mot.laser.polarization import circular_polarization, spherical_fractions
 
 
 def test_atomic_strengths_and_recoil_are_physical():
-    atom = Rb87D2(); atom.validate()
-    assert atom.recoil_velocity > 0
-    assert 0 < atom.recoil_temperature < atom.doppler_temperature
+    atom = get_atomic_line("87Rb", "D2")
+    assert atom.recoil_velocity_m_s > 0
+    assert 0 < atom.recoil_temperature_k < atom.doppler_temperature_k
 
 
 def test_gaussian_power_integral():

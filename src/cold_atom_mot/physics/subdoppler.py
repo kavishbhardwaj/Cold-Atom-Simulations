@@ -1,4 +1,4 @@
-"""Phase-resolved polarization-gradient polarization-gradient cooling.
+"""Phase-resolved adiabatic polarization-gradient cooling.
 
 This module implements a controlled, low-saturation adiabatic-elimination model
 for the closed 87Rb D2 F=2 -> F'=3 manifold.  Five ground-state populations are
@@ -12,7 +12,6 @@ import numpy as np
 from scipy.constants import hbar, physical_constants
 from scipy.integrate import solve_ivp
 
-from ..atomic.angular_momentum import clebsch_gordan
 from ..atomic.species import AtomicBasis
 from ..laser.polarization import circular_polarization, spherical_fractions, unit
 

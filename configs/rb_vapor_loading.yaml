@@ -1,0 +1,11 @@
+model: configurable_vapor_loading
+vacuum:
+  cell_temperature_k: 300.0
+  rb_partial_pressure_pa: null  # null selects the cited vapour-pressure fit
+  background_gas_pressure_pa: 1.0e-7
+  isotope_fractions: {85Rb: 0.7217, 87Rb: 0.2783}
+loading:
+  loading_rate_atoms_s: 1.0e6  # placeholder input requiring trajectory/geometry calibration
+  one_body_loss_s: 0.1         # experiment-specific input; not inferred from pressure
+  two_body_loss_m3_s: 0.0      # phenomenological; no default literature claim
+  effective_volume_m3: 1.0e-9

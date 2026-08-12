@@ -1,12 +1,11 @@
 import numpy as np
 import pytest
-from cold_atom_mot.atomic.rb87 import Rb87D2
-from cold_atom_mot.atomic.species import build_atomic_basis
+from cold_atom_mot.atomic.species import build_atomic_basis, get_atomic_line
 from cold_atom_mot.physics.subdoppler import coherent_six_beam_field, PolarizationGradientModel
 
 
 def model(**kwargs):
-    atom = Rb87D2()
+    atom = get_atomic_line("87Rb", "D2")
     beams = coherent_six_beam_field(atom.wave_number, 0.04, [0, 0, 0, np.pi/2, 0, np.pi/4])
     return PolarizationGradientModel(build_atomic_basis("87Rb", "D2"), 2, 3, -3 * atom.gamma, beams, **kwargs)
 
@@ -36,7 +35,7 @@ def test_light_shifts_and_forces_are_finite_and_state_resolved():
 
 
 def test_residual_axial_field_gives_correct_zeeman_spacing():
-    atom = Rb87D2(); zero = model(); biased = model(magnetic_field_t=[0, 0, 2e-5])
+    zero = model(); biased = model(magnetic_field_t=[0, 0, 2e-5])
     difference = biased.light_shifts([0, 0, 0]) - zero.light_shifts([0, 0, 0])
     # Direct ground Zeeman spacing dominates; the small nonuniform correction
     # is the physically retained excited-minus-ground transition shift.
