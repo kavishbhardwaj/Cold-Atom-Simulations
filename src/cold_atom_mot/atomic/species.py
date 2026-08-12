@@ -4,7 +4,7 @@ Constants follow Steck's 85Rb/87Rb D-line data, revision 2.3.2 (2021).
 Angular frequencies use rad/s; tabulated hyperfine constants use Hz.
 """
 from dataclasses import dataclass
-from functools import cached_property, lru_cache
+from functools import lru_cache
 from types import MappingProxyType
 import numpy as np
 from scipy.constants import hbar, k as boltzmann, physical_constants

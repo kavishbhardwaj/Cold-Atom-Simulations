@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-from scipy.linalg import eigvalsh
 from cold_atom_mot.atomic.species import build_atomic_basis,get_atomic_line
 from cold_atom_mot.io.config import load_config,build_multilevel_model
 from cold_atom_mot.laser.beam import GaussianBeam,grouped_intensity

@@ -1,6 +1,6 @@
 """Effective two-level semiclassical MOT radiation pressure.
 
-This level-A model includes local Gaussian intensity, shared saturation, Doppler
+This effective model includes local Gaussian intensity, shared saturation, Doppler
 shift, a signed scalar Zeeman shift, gravity, and per-beam momentum.  It does
 not contain Zeeman populations, Clebsch-Gordan-resolved optical pumping,
 coherences, stimulated-force interference, or sub-Doppler forces.
