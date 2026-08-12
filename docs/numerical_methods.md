@@ -138,3 +138,37 @@ retained and the Hamiltonian remains continuous at field zero. The effective
 force, rate equations, and population-only polarization-gradient model retain
 documented reduced Zeeman approximations for speed; they are not equivalent to
 this coherent Hamiltonian.
+
+## Moving-atom multilevel OBE
+
+`MultilevelOBE` uses the complete generated D2 dipole graph, rather than
+discarding couplings outside a laser's nominal tuning manifold.  For 87Rb this
+is the 24-state basis (8 ground and 16 excited states), a 576-component complex
+density matrix, and spontaneous collapse operators made from the calculated
+branching matrix.  Cooling and repump target labels determine laser frequency;
+they do not filter the allowed excited hyperfine states.
+
+One global excited-manifold optical reference is used.  Every beam then carries
+its own phase
+
+`k_i . (r0 + v t) - delta_omega_i t + phi_i`,
+
+where `delta_omega_i` contains the selected hyperfine tuning, detuning, and AOM
+offset.  Consequently the trajectory-frame frequency is independently
+`delta_omega_i-k_i.v`.  Equal trajectory-frame frequencies admit a stationary
+rotating-frame sparse null solve.  Unequal frequencies are not folded into an
+effective detuning: the sparse, explicitly time-dependent Liouvillian is
+integrated and its late-time force is averaged.
+
+The per-beam force is evaluated as `-hbar Tr(rho gradient(H_i/hbar))`.  A spatial
+central derivative includes both the travelling-wave radiation-pressure term
+and Gaussian-envelope dipole force, including stimulated/coherent effects.
+Spontaneous emission has zero mean recoil in the isotropic approximation and
+therefore adds diffusion but no mean force.
+
+`quick` mode uses 12 lifetimes and 49 output samples for a time-dependent point;
+`research` uses 40 lifetimes and 241 samples with tighter integration tolerance.
+These modes are intended for representative phase-space points and short 1-D
+scans.  A full multi-frequency 24-state three-dimensional grid is deliberately
+not a CI workload; rate equations remain the appropriate weak-coherence grid
+model.
