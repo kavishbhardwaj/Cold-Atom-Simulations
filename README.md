@@ -4,7 +4,7 @@ A reproducible SI-unit Python framework for **rubidium MOTs, laser cooling, and 
 
 The goal is to connect atomic physics to laboratory-level questions while keeping every approximation visible. This repository is **not a calibrated digital twin of a particular experiment by default**: measured apparatus parameters and externally validated high-fidelity cooling models are still required for quantitative temperature, atom-number, and tolerance predictions.
 
-> **New to the repository?** Start with the **[full technical tutorial: From Rubidium Atoms to a MOT Simulation](docs/tutorial/README.md)**. It derives the equations, explains the modelling decisions and approximations, follows the calculation in physical order, and gives a clean-checkout reproduction workflow. The README below remains a compact project overview.
+> **New to the repository?** Start with the **[continuous equation-to-result tutorial](docs/tutorial/continuous_walkthrough.md)**. It defines symbols before they appear, derives the physics in calculation order, explains why each model/tool was chosen, states the approximation, shows the corresponding result or pedagogical plot, and then explains why the next model is needed. The [equation inventory](docs/tutorial/00_notation_and_equation_inventory.md) is the completeness/glossary companion and the [visual atlas](docs/tutorial/equation_visual_atlas.md) collects the main equation plots.
 
 ## What is trustworthy today?
 
@@ -63,8 +63,10 @@ See the **[scientific results gallery](results/README.md)** for captions, numeri
 
 ## Repository guide
 
-Start with the **[technical tutorial](docs/tutorial/README.md)**; use the [documentation map](docs/README.md) for shorter reference pages. The main technical references are:
+Start with the **[continuous tutorial](docs/tutorial/continuous_walkthrough.md)**; use the [tutorial index](docs/tutorial/README.md) and [documentation map](docs/README.md) for deeper reference pages. The main technical references are:
 
+- [Notation/equation inventory](docs/tutorial/00_notation_and_equation_inventory.md) — symbols and governing equations.
+- [Equation visual atlas](docs/tutorial/equation_visual_atlas.md) — equation plots and corresponding simulation results.
 - [Model hierarchy](docs/model_hierarchy.md) — what each solver includes and neglects.
 - [Validation](docs/validation.md) — independent checks, error metrics, and remaining validation gates.
 - [Cooling physics](docs/cooling_physics.md) — force, optical pumping, recoil, and PGC assumptions.
