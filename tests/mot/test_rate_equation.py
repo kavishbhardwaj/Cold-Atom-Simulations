@@ -23,7 +23,7 @@ def test_spontaneous_branching_normalizes_per_excited_state():
 
 
 def test_generator_conserves_probability_and_steady_state_is_physical():
-    model = build_multilevel_model(load_config('configs/rb87_phase2_rate_equation.yaml'))
+    model = build_multilevel_model(load_config('configs/rb87_d2_multilevel.yaml'))
     generator = model.generator(np.zeros(3), np.zeros(3))
     np.testing.assert_allclose(generator.sum(axis=0), 0.0, atol=2e-8)
     population = model.steady_state(np.zeros(3), np.zeros(3))
@@ -33,7 +33,7 @@ def test_generator_conserves_probability_and_steady_state_is_physical():
 
 
 def test_repump_recovers_f2_population():
-    config = load_config('configs/rb87_phase2_rate_equation.yaml')
+    config = load_config('configs/rb87_d2_multilevel.yaml')
     with_repump = build_multilevel_model(config).steady_state(np.zeros(3), np.zeros(3))
     weak = copy.deepcopy(config)
     weak['repump']['power_per_beam_w'] = 1e-9
@@ -44,7 +44,7 @@ def test_repump_recovers_f2_population():
 
 
 def test_multilevel_force_restores_and_damps():
-    config = load_config('configs/rb87_phase2_rate_equation.yaml')
+    config = load_config('configs/rb87_d2_multilevel.yaml')
     config['gravity']['vector_m_per_s2'] = [0, 0, 0]
     model = build_multilevel_model(config)
     assert model.force(np.array([1e-4, 0, 0]), np.zeros(3))[0] < 0

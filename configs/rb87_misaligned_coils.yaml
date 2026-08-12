@@ -1,4 +1,4 @@
-# Geometry study input for AntiHelmholtzPair.symmetric; not used by Level-A CLI yet.
+# Geometry study input for AntiHelmholtzPair.symmetric; not used by effective-model CLI yet.
 coils:
   radius_m: 0.04
   separation_m: 0.04

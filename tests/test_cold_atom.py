@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from cold_atom import (
+from cold_atom_mot.foundations import (
     ballistic_trajectory,
     gaussian_beam_waist,
     gravitational_sag,

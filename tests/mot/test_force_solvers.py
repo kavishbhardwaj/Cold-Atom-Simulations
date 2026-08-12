@@ -1,5 +1,8 @@
 import numpy as np
 import pytest
+from dataclasses import replace
+from cold_atom_mot.physics.force import EffectiveMOTForce
+from cold_atom_mot.magnetic.fields import IdealQuadrupole
 from cold_atom_mot.io.config import build_effective_model, load_config
 from cold_atom_mot.solvers.deterministic import integrate_trajectory
 from cold_atom_mot.solvers.monte_carlo import isotropic_directions, simulate_photon_events
@@ -7,7 +10,7 @@ from cold_atom_mot.solvers.monte_carlo import isotropic_directions, simulate_pho
 
 @pytest.fixture
 def model():
-    config = load_config('configs/rb87_standard_mot.yaml')
+    config = load_config('configs/rb87_d2_mot.yaml')
     config['gravity']['vector_m_per_s2'] = [0, 0, 0]
     return build_effective_model(config)
 
@@ -48,7 +51,28 @@ def test_monte_carlo_seed_and_recoil(model):
 
 
 def test_timestep_refinement_statistical_mean(model):
-    position = np.zeros((300, 3)); velocity = np.tile([0.05, 0, 0], (300, 1))
+    position = np.zeros((1200, 3)); velocity = np.tile([0.05, 0, 0], (1200, 1))
     coarse = simulate_photon_events(model, position, velocity, 1e-6, 5e-9, seed=9, store_every=200)
     fine = simulate_photon_events(model, position, velocity, 1e-6, 2.5e-9, seed=9, store_every=400)
     assert abs(coarse.velocity[-1, :, 0].mean() - fine.velocity[-1, :, 0].mean()) < 0.003
+
+
+def test_damping_turnover_and_derivative_refinement():
+    config=load_config('configs/rb87_d2_mot.yaml'); values=[]
+    for power in (1e-5,1e-3,.1,1.0):
+        config['laser']['power_per_beam_w']=power; m=build_effective_model(config)
+        coarse=m.linear_coefficients(velocity_step=1e-3)[0][0]
+        fine=m.linear_coefficients(velocity_step=2e-4)[0][0]
+        assert coarse==pytest.approx(fine,rel=2e-5); values.append(fine)
+    assert values[1] > values[0] and values[-1] < max(values)
+
+
+def test_effective_force_rotates_with_apparatus():
+    config=load_config('configs/rb87_d2_mot.yaml'); config['gravity']['vector_m_per_s2']=[0,0,0]
+    original=build_effective_model(config); angle=.61
+    rotation=np.array([[np.cos(angle),-np.sin(angle),0],[np.sin(angle),np.cos(angle),0],[0,0,1]])
+    beams=[replace(b,direction=rotation@b.direction,origin=rotation@b.origin) for b in original.beams]
+    field=IdealQuadrupole(config['magnetic_field']['radial_gradient_t_per_m'],rotation=rotation)
+    rotated=EffectiveMOTForce(original.atom,beams,field,np.zeros(3))
+    r=np.array([2e-4,-1e-4,1.5e-4]); v=np.array([.03,-.02,.01])
+    np.testing.assert_allclose(rotated.force(rotation@r,rotation@v),rotation@original.force(r,v),rtol=2e-12,atol=1e-30)

@@ -20,6 +20,11 @@ def isotropic_directions(rng: np.random.Generator, count: int) -> np.ndarray:
     return vectors / np.linalg.norm(vectors, axis=1)[:, None]
 
 
+def at_least_one_event_probability(rate, time_step):
+    """Exact Poisson probability for >=1 event; solver still applies one kick."""
+    return -np.expm1(-np.asarray(rate)*time_step)
+
+
 def simulate_photon_events(force_model, position, velocity, duration, time_step, *, seed=0, store_every=1) -> EnsembleTrajectory:
     """Evolve atoms using Bernoulli absorption and isotropic emission events.
 
@@ -47,7 +52,7 @@ def simulate_photon_events(force_model, position, velocity, duration, time_step,
         dt = min(time_step, duration - time)
         rates = force_model.scattering_rates(positions, velocities, time)
         total_rates = rates.sum(axis=1)
-        event_probability = -np.expm1(-total_rates * dt)
+        event_probability = at_least_one_event_probability(total_rates, dt)
         if np.max(event_probability) > 0.1:
             raise ValueError("time step too large: total scattering probability exceeds 0.1")
         scattered = rng.random(len(positions)) < event_probability

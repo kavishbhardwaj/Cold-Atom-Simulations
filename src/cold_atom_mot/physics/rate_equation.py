@@ -2,7 +2,7 @@
 
 This model evolves populations only.  Off-diagonal density-matrix coherences,
 coherent dark states, light shifts and polarization-gradient forces require the
-future OBE/Level-C and phase-resolved/Level-D models.
+future OBE/coherent-model and phase-resolved/polarization-gradient models.
 """
 
 from dataclasses import dataclass
@@ -42,7 +42,7 @@ class MultilevelRateEquationMOT:
         position = np.asarray(position, dtype=float)
         velocity = np.asarray(velocity, dtype=float)
         if position.shape != (3,) or velocity.shape != (3,):
-            raise ValueError("Level-B rates currently accept one 3D phase-space point")
+            raise ValueError("rate-equation rates currently accept one 3D phase-space point")
         magnetic = np.asarray(self.magnetic_field.field(position, time), dtype=float)
         b_magnitude = np.linalg.norm(magnetic)
         saturation = np.array([family.beam.intensity(position) / self.atom.saturation_intensity_w_m2 for family in self.beam_families])
@@ -63,7 +63,7 @@ class MultilevelRateEquationMOT:
                 effective_s = saturation[bi] * transition.strength * components[transition.q]
                 # Saturation emerges from the bidirectional stimulated terms
                 # and finite populations in the rate equations. Adding the
-                # Level-A shared denominator here would count it twice.
+                # effective-model shared denominator here would count it twice.
                 output[bi, ti] = 0.5 * self.atom.gamma_rad_s * effective_s / (1.0 + (2 * delta / self.atom.gamma_rad_s) ** 2)
         return output
 

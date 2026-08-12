@@ -1,4 +1,4 @@
-"""Phase-3 reduced two-level optical Bloch equations.
+"""Two-level OBE reduced two-level optical Bloch equations.
 
 This backend resolves one explicitly selected |g> <-> |e> transition.  It is a
 coherence-capable validation and teaching backend, not a 24-state six-beam OBE.

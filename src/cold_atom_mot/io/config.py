@@ -21,10 +21,10 @@ def load_config(path: str | Path, *, validate: bool = True) -> dict:
 
 def validate_config(config: dict) -> None:
     """Reject missing or manifestly unphysical inputs for each fidelity level."""
-    if config.get("model") == "level_d_phase_resolved_pgc":
+    if config.get("model") == "polarization_gradient":
         for section in ("atom", "laser", "magnetic_field", "simulation", "output"):
             if section not in config:
-                raise ValueError(f"Level-D configuration requires {section}")
+                raise ValueError(f"polarization-gradient configuration requires {section}")
         laser, simulation = config["laser"], config["simulation"]
         if laser["saturation_per_beam"] < 0 or laser["detuning_gamma"] == 0:
             raise ValueError("PGC saturation must be non-negative and detuning non-zero")
@@ -33,10 +33,10 @@ def validate_config(config: dict) -> None:
         if simulation["steps_per_period"] < 8 or simulation["velocity_m_per_s"] == 0:
             raise ValueError("PGC resolution must be >=8 and probe velocity non-zero")
         return
-    if config.get("model") == "level_c_reduced_two_level_obe":
+    if config.get("model") == "two_level_obe":
         required = ("atom", "obe", "output")
         if any(section not in config for section in required):
-            raise ValueError(f"Level-C configuration requires sections: {required}")
+            raise ValueError(f"coherent-model configuration requires sections: {required}")
         obe = config["obe"]
         if obe["saturation"] < 0 or obe["duration_lifetimes"] <= 0:
             raise ValueError("OBE saturation must be non-negative and duration positive")
@@ -51,10 +51,10 @@ def validate_config(config: dict) -> None:
     laser = config["laser"]
     if laser["power_per_beam_w"] < 0 or laser["waist_m"] <= 0:
         raise ValueError("laser power must be non-negative and waist positive")
-    if config.get("model") == "level_b_multilevel_rate_equation":
+    if config.get("model") == "multilevel_rate_equation":
         repump = config.get("repump")
         if not repump or repump["power_per_beam_w"] < 0 or repump["waist_m"] <= 0:
-            raise ValueError("Level-B repump power must be non-negative and waist positive")
+            raise ValueError("rate-equation repump power must be non-negative and waist positive")
     if config["simulation"]["duration_s"] <= 0 or config["monte_carlo"]["time_step_s"] <= 0:
         raise ValueError("simulation times must be positive")
 
@@ -77,7 +77,7 @@ def build_effective_model(config: dict) -> EffectiveMOTForce:
 
 
 def build_multilevel_model(config: dict) -> MultilevelRateEquationMOT:
-    """Build the Level-B cooling+repump population model."""
+    """Build the rate-equation cooling+repump population model."""
     atom_config = config["atom"]
     atom = get_atomic_line(atom_config.get("isotope", "87Rb"), atom_config.get("line", "D2"))
     if not atom.rate_equation_mot or atom.cooling_transition is None:
@@ -111,7 +111,7 @@ def build_multilevel_model(config: dict) -> MultilevelRateEquationMOT:
 
 
 def build_subdoppler_model(config: dict) -> PolarizationGradientModel:
-    """Build the explicitly phase-coherent Level-D F=2 -> F'=3 model."""
+    """Build the explicitly phase-coherent polarization-gradient F=2 -> F'=3 model."""
     atom = Rb87D2(); laser = config["laser"]
     groups = laser.get("coherence_groups", ["all"] * 6)
     beams = coherent_six_beam_field(atom.wave_number_rad_m, laser["saturation_per_beam"], laser["phases_rad"], groups)

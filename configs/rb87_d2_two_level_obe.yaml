@@ -1,4 +1,4 @@
-model: level_c_reduced_two_level_obe
+model: two_level_obe
 atom:
   isotope: 87Rb
   line: D2
@@ -13,4 +13,4 @@ obe:
   atol: 1.0e-11
   max_step_lifetimes: 0.05
 output:
-  directory: results/phase3
+  directory: results/optical_bloch

@@ -1,4 +1,4 @@
-model: level_b_multilevel_rate_equation
+model: multilevel_rate_equation
 atom:
   isotope: 87Rb
   line: D2
@@ -38,4 +38,4 @@ rate_equation:
   position_extent_m: 0.003
   points: 81
 output:
-  directory: results/phase2
+  directory: results/multilevel

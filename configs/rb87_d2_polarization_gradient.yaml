@@ -1,4 +1,4 @@
-model: level_d_phase_resolved_pgc
+model: polarization_gradient
 atom:
   isotope: 87Rb
   line: D2
@@ -16,4 +16,4 @@ simulation:
   steps_per_period: 80
   velocity_m_per_s: 0.02
 output:
-  directory: results/phase4
+  directory: results/polarization_gradient

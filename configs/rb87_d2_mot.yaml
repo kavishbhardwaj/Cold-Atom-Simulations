@@ -1,4 +1,4 @@
-model: level_a_effective_two_level
+model: effective_mot
 atom:
   isotope: 87Rb
   line: D2
@@ -9,7 +9,7 @@ laser:
   detuning_gamma: -2.0
 repump:
   modeled: false
-  note: Phase 1 assumes atoms remain in the effective cooling cycle.
+  note: The effective model assumes atoms remain in the effective cooling cycle.
 magnetic_field:
   model: ideal_quadrupole_plus_uniform_stray
   radial_gradient_t_per_m: 0.10
@@ -29,4 +29,4 @@ monte_carlo:
   store_every: 200
   seed: 20260811
 output:
-  directory: results/phase1
+  directory: results/effective_mot
