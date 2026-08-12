@@ -141,3 +141,64 @@ Cohen-Tannoudji, JOSA B **6**, 2023 (1989), DOI 10.1364/JOSAB.6.002023, provides
 the primary theoretical context that magnetic precession disrupts Sisyphus
 optical pumping. Geometry and atomic assumptions are not matched, so the
 comparison is qualitative and parameters were not fitted.
+
+## Independent validation matrix
+
+Labels are deliberately narrow: verification of one limit does not validate a
+different solver or apparatus model.
+
+| Claim | Analytical | Independent internal | QuTiP 5.3.1 | PyLCP 1.0.2 | Published theory | Published experiment |
+|---|---|---|---|---|---|---|
+| Two-level OBE steady state, Liouvillian, Rabi dynamics, decay | **ANALYTICALLY VERIFIED** | **INTERNAL TESTED** | **INDEPENDENT-SOFTWARE VERIFIED** | not needed | standard OBE | **NOT YET VALIDATED** |
+| Normalized 1-D two-beam molasses force | **ANALYTICALLY VERIFIED** | **INTERNAL TESTED** | not needed | **INDEPENDENT-SOFTWARE VERIFIED** | standard Doppler theory | **NOT YET VALIDATED** |
+| 87Rb ground vector-Zeeman spectrum | weak-field and rotation checks | independent uncoupled/coupled construction | not compared | **INDEPENDENT-SOFTWARE VERIFIED** | Breit-Rabi trend | spectroscopy not compared |
+| 24-state moving OBE | two-level/trace limits only | **INTERNAL TESTED** | full case **NOT YET VALIDATED** | full case **NOT YET VALIDATED** | **NOT YET VALIDATED** | **NOT YET VALIDATED** |
+| Adiabatic population PGC | limiting formulas | **INTERNAL TESTED** | not comparable | not compared | **LITERATURE-TREND VERIFIED** | **NOT YET VALIDATED** |
+| MOT/loading predictions | component formulas | **INTERNAL TESTED** | not compared | simple normalized force only | qualitative | **EXPERIMENTALLY COMPARED; not quantitatively reproduced** |
+
+### QuTiP methodology and errors
+
+The benchmark constructs through QuTiP's public API exactly the internal
+Hamiltonian `[[0,Omega*/2],[Omega/2,-Delta]]`, collapse operator
+`sqrt(Gamma)|g><e|`, and saturation convention
+`s=2|Omega|^2/Gamma^2`. Row-stacked internal and column-stacked QuTiP
+Liouvillians are related by an explicit permutation. Tests span detuning and
+saturation, damped Rabi oscillations, and pure spontaneous decay. The generated
+NPZ records maximum population errors; no fitted parameter is used.
+
+### PyLCP methodology and scope
+
+PyLCP is called only through its public API. Its `heuristiceq` two-beam plane-
+wave case is matched in dimensionless units (`Gamma=k=hbar=1`), including each
+beam's `s=0.05`, detuning `-2 Gamma`, propagation direction, and shared
+saturation denominator. Force is compared at 101 velocities by RMS and maximum
+relative error. This verifies the normalized heuristic force, **not** the full
+87Rb multilevel implementation.
+
+The independent 87Rb comparison uses PyLCP's public `hyperfine_coupled` helper
+with the same `I=3/2`, `J=1/2`, hyperfine A, electronic g factor and Bohr
+magneton. PyLCP's documented nuclear-g convention has the opposite sign to the
+Steck convention used here, so the mapping is explicit. Ground-manifold spectra
+at 0, 1 uT and 100 uT agree within 0.7 Hz. A matched PyLCP 87Rb D2 force,
+population, 1-D MOT, and 3-D MOT benchmark remains **NOT YET VALIDATED**; the
+repository does not disguise the normalized two-level comparison as that work.
+
+### Literature and experiment
+
+Dalibard and Cohen-Tannoudji, *JOSA B* **6**, 2023 (1989), DOI
+`10.1364/JOSAB.6.002023`, is the primary theoretical benchmark. The repository
+reproduces the red-detuned polarization-gradient mechanism—spatial light shifts,
+state-dependent pumping, sub-Doppler odd force and magnetic-precession
+suppression—as a **LITERATURE-TREND VERIFIED** result. Geometry, reduced
+manifolds, dimensionality and diffusion are not sufficiently matched for a
+numerical curve claim.
+
+Lett et al., *JOSA B* **6**, 2084 (1989), DOI `10.1364/JOSAB.6.002084`, is an
+experimental observation of sub-Doppler cooling, but it uses sodium rather than
+87Rb and therefore is not an 87Rb validation. Townsend et al., *Phys. Rev. A*
+**52**, 1423 (1995), DOI `10.1103/PhysRevA.52.1423`, supplies an established MOT
+experimental context, but beam profiles, phase topology, residual vector field,
+coil transfer function and capture boundary are insufficiently matched to the
+present reference apparatus. It is labeled **EXPERIMENTALLY COMPARED; not
+quantitatively reproduced**, with measured/assumed/unknown inputs kept separate.
+No experimental parameter was tuned to reduce a residual.
