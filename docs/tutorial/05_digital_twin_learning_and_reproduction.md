@@ -1,6 +1,6 @@
 # Part V — From framework to digital twin: learning and reproduction
 
-# 21. How a real apparatus would turn this framework into a digital twin
+# 20. How a real apparatus would turn this framework into a digital twin
 
 To make the simulation quantitatively predictive for one laboratory, the model would ingest measured quantities such as:
 
@@ -19,13 +19,13 @@ To make the simulation quantitatively predictive for one laboratory, the model w
 The same code hierarchy could then propagate those measured imperfections into force, capture, loading and eventually temperature predictions. This is the distinction between a **physics framework** and a **calibrated digital twin**.
 
 ---
-# 22. Suggested learning path for a student
+# 21. Suggested learning path for a student
 
 1. Run `configs/rb87_d2_mot.yaml` and understand the effective force map.
 2. Derive the two-beam Doppler force by hand and compare with the code.
 3. Inspect the generated 24-state basis and selection rules.
 4. Run the multilevel rate equation and watch repump transfer population back into F=2.
-5. Study the two-level OBE and reproduce the analytical \(\rho_{ee}\).
+5. Study the two-level OBE and reproduce the analytical $\rho_{ee}$.
 6. Inspect the vector Zeeman spectrum and compare linear vs exact shifts.
 7. Run the reduced PGC example and follow one Sisyphus optical period.
 8. Compare zero and finite residual fields, remembering that the current 9.4 mG marker is a timescale comparison, not a temperature threshold.
@@ -34,7 +34,7 @@ The same code hierarchy could then propagate those measured imperfections into f
 11. Only after understanding these pieces, move to the 24-state moving OBE and external validation.
 
 ---
-# 23. Repository map for this tutorial
+# 22. Repository map for this tutorial
 
 - `src/cold_atom_mot/atomic/` — isotope/line data, hyperfine basis, vector Zeeman physics.
 - `src/cold_atom_mot/laser/` — Gaussian beams, polarization, Jones optics, coherence groups and apparatus topology.
@@ -48,11 +48,11 @@ The same code hierarchy could then propagate those measured imperfections into f
 - `docs/validation.md` — what is externally verified and what remains pending.
 
 ---
-# 24. Reproducing the repository from a clean checkout
+# 23. Reproducing the repository from a clean checkout
 
 This section turns the tutorial into an executable workflow. The repository uses **Python 3.10 or newer** and keeps physical calculations in SI units. The package metadata declares NumPy, SciPy, Matplotlib, PyYAML and SymPy as core dependencies; QuTiP and PyLCP are optional pinned validation dependencies.
 
-## 24.1 Create an isolated environment
+## 23.1 Create an isolated environment
 
 From a clean clone of the repository:
 
@@ -77,7 +77,7 @@ python -m pip install -r requirements-validation.txt
 
 At the time this tutorial was written, the validation file pins QuTiP 5.3.1 and PyLCP 1.0.2 so that external comparisons use a known software environment.
 
-## 24.2 Run the five main physics entry points
+## 23.2 Run the five main physics entry points
 
 The following commands reproduce the core solver paths described in this tutorial:
 
@@ -99,7 +99,7 @@ These are not interchangeable commands. They deliberately invoke different fidel
 
 The 24-state moving OBE is primarily a research-level backend used by diagnostics and validation scripts rather than a large-grid default CLI calculation.
 
-## 24.3 Regenerate representative committed figures
+## 23.3 Regenerate representative committed figures
 
 The repository stores generated figures together with numerical arrays/metadata. Representative regeneration commands are:
 
@@ -120,7 +120,7 @@ python examples/generate_external_validation_results.py
 
 The corresponding outputs are written below `results/`. The result archives store the arrays and metadata used to construct the figures; the figure itself should never be the only record of a calculation.
 
-## 24.4 Run the validation suite
+## 23.4 Run the validation suite
 
 ```bash
 python -m pytest -q
@@ -140,7 +140,7 @@ A reproduction should not be judged only by whether a plot looks similar. The fo
 8. stochastic runs must reproduce when the stored random seed is reused;
 9. research calculations must be refined in time step, integration duration, phase sampling and ensemble size rather than trusting one default setting.
 
-## 24.5 Reference configurations used throughout the tutorial
+## 23.5 Reference configurations used throughout the tutorial
 
 The main effective-MOT reference is stored in `configs/rb87_d2_mot.yaml`:
 
@@ -161,7 +161,7 @@ The experimental timeline in `configs/rb87_d2_reference_sequence.yaml` is explic
 
 The vapour-loading configuration `configs/rb_vapor_loading.yaml` keeps reservoir, vapour and background-gas temperatures distinct, uses natural-isotope fractions, and exposes all collision/loss parameters instead of inventing them.
 
-## 24.6 Numerical reproducibility versus physical reproducibility
+## 23.6 Numerical reproducibility versus physical reproducibility
 
 These are different concepts.
 
@@ -182,7 +182,7 @@ Therefore every serious comparison should record:
 - which parameters are calculated, literature-sourced, user supplied or experimentally calibrated.
 
 ---
-# 25. Equation-to-code map
+# 24. Equation-to-code map
 
 This table is intended to let a student move directly from a derivation in this tutorial to the implementation that evaluates it.
 
@@ -208,7 +208,7 @@ This table is intended to let a student move directly from a derivation in this 
 If a path changes in a later refactor, the governing principle is more important than the exact filename: configurations specify physical assumptions, `physics/` contains the model equations, `solvers/` propagates dynamics, and `results/` stores generated evidence plus metadata.
 
 ---
-# 26. A reproducibility checklist before accepting a new result
+# 25. A reproducibility checklist before accepting a new result
 
 Before interpreting any new curve as physics, ask:
 
@@ -226,7 +226,7 @@ Before interpreting any new curve as physics, ask:
 This checklist is the practical implementation of the repository's central philosophy: make approximations explicit before making conclusions.
 
 ---
-# 27. Final perspective
+# 26. Final perspective
 
 The repository evolved by repeatedly asking a simple question:
 
