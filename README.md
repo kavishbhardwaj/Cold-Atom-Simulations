@@ -40,6 +40,7 @@ are not faked here. See [atomic systems](docs/atomic_systems.md).
 Detailed equations and boundaries: [model hierarchy](docs/model_hierarchy.md),
 [cooling physics](docs/cooling_physics.md), [numerics](docs/numerical_methods.md),
 and [validation](docs/validation.md).
+Time-dependent laboratory controls are described in [experimental sequences](docs/experimental_sequences.md).
 
 ## Selected results
 

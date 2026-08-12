@@ -1,0 +1,20 @@
+model: experimental_sequence
+fidelity: illustrative_reference_not_experimental_optimum
+atom: {isotope: 87Rb, line: D2}
+stages:
+  - {name: vapor_mot_loading, duration_s: 0.020, cooling_detuning_gamma: [-2, -2], cooling_power_per_beam_w: [0.010, 0.010], repump_power_per_beam_w: [0.0005, 0.0005], radial_gradient_t_per_m: [0.10, 0.10], ramp: step}
+  - {name: compressed_mot, duration_s: 0.005, cooling_detuning_gamma: [-2, -3], cooling_power_per_beam_w: [0.010, 0.006], repump_power_per_beam_w: [0.0005, 0.0003], radial_gradient_t_per_m: [0.10, 0.16], ramp: smooth}
+  - {name: gradient_switch_off, duration_s: 0.002, cooling_detuning_gamma: [-3, -4], cooling_power_per_beam_w: [0.006, 0.003], repump_power_per_beam_w: [0.0003, 0.0002], radial_gradient_t_per_m: [0.16, 0], ramp: smooth}
+  - {name: field_settling, duration_s: 0.002, cooling_detuning_gamma: [-4, -4], cooling_power_per_beam_w: [0, 0], repump_power_per_beam_w: [0, 0], radial_gradient_t_per_m: [0, 0], ramp: step}
+  - {name: pgc_ramp, duration_s: 0.002, cooling_detuning_gamma: [-4, -6], cooling_power_per_beam_w: [0.003, 0.0015], repump_power_per_beam_w: [0.0002, 0.0001], radial_gradient_t_per_m: [0, 0], ramp: smooth}
+  - {name: molasses_hold, duration_s: 0.006, cooling_detuning_gamma: [-6, -6], cooling_power_per_beam_w: [0.0015, 0.0015], repump_power_per_beam_w: [0.0001, 0.0001], radial_gradient_t_per_m: [0, 0], ramp: step}
+  - {name: release_tof, duration_s: 0.010, cooling_detuning_gamma: [-6, -6], cooling_power_per_beam_w: [0, 0], repump_power_per_beam_w: [0, 0], radial_gradient_t_per_m: [0, 0], ramp: step}
+magnetic_response:
+  switch_time_s: 0.025
+  coil_decay_time_s: 0.0005
+  eddy_decay_time_s: 0.002
+  eddy_amplitude_t: [0, 0, 0.00001]
+  residual_dc_t: [0, 0, 0.000001]
+  mains_frequency_hz: 50
+  mains_amplitude_t: [0, 0, 0]
+notes: Parameters are illustrative and deliberately not claimed as an experimental optimum; mains amplitude is zero unless measured by a user.
