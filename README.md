@@ -4,6 +4,8 @@ A reproducible SI-unit Python framework for **rubidium MOTs, laser cooling, and 
 
 The goal is to connect atomic physics to laboratory-level questions while keeping every approximation visible. This repository is **not a calibrated digital twin of a particular experiment by default**: measured apparatus parameters and externally validated high-fidelity cooling models are still required for quantitative temperature, atom-number, and tolerance predictions.
 
+> **New to the repository?** Start with the **[full technical tutorial: From Rubidium Atoms to a MOT Simulation](docs/tutorial/README.md)**. It derives the equations, explains the modelling decisions and approximations, follows the calculation in physical order, and gives a clean-checkout reproduction workflow. The README below remains a compact project overview.
+
 ## What is trustworthy today?
 
 **Implemented** means the model exists and has internal tests. **Externally verified** means a matched result agrees with an independent implementation. **Experimentally calibrated** would require measured apparatus inputs and quantitative agreement with a specified experiment.
@@ -61,7 +63,7 @@ See the **[scientific results gallery](results/README.md)** for captions, numeri
 
 ## Repository guide
 
-Start with the [documentation map](docs/README.md). The main technical references are:
+Start with the **[technical tutorial](docs/tutorial/README.md)**; use the [documentation map](docs/README.md) for shorter reference pages. The main technical references are:
 
 - [Model hierarchy](docs/model_hierarchy.md) — what each solver includes and neglects.
 - [Validation](docs/validation.md) — independent checks, error metrics, and remaining validation gates.
