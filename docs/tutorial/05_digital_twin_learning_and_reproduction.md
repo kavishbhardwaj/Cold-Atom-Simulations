@@ -195,7 +195,7 @@ This table is intended to let a student move directly from a derivation in this 
 | ideal/residual magnetic fields | `src/cold_atom_mot/magnetic/fields.py` | MOT and residual-field configs |
 | physical circular/Helmholtz/anti-Helmholtz coils | `src/cold_atom_mot/magnetic/coils.py` | magnetic-apparatus generator |
 | effective scattering force | `src/cold_atom_mot/physics/force.py` | `rb87_d2_mot.yaml` |
-| multilevel population rate equations | `src/cold_atom_mot/physics/multilevel.py` or corresponding rate-equation module | `rb87_d2_multilevel.yaml` |
+| multilevel population rate equations | `src/cold_atom_mot/physics/rate_equation.py` | `rb87_d2_multilevel.yaml` |
 | two-level OBE/Lindblad benchmark | `src/cold_atom_mot/physics/optical_bloch.py` | two-level OBE config/validation |
 | 24-state moving OBE and Hamiltonian-gradient force | `src/cold_atom_mot/physics/multilevel_obe.py` | vector-field and research diagnostics |
 | reduced Sisyphus/PGC model | `src/cold_atom_mot/physics/subdoppler.py` | `rb87_d2_polarization_gradient.yaml` |
