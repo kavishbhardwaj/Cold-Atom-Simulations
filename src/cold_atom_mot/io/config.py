@@ -3,12 +3,12 @@
 from pathlib import Path
 import numpy as np
 import yaml
-from ..atomic.rb87 import Rb87D2
+from ..atomic.species import get_atomic_line, build_atomic_basis
 from ..laser.beam import six_beam_mot
 from ..magnetic.fields import CompositeField, IdealQuadrupole, ResidualField
 from ..physics.force import EffectiveMOTForce
 from ..physics.rate_equation import BeamFamily, MultilevelRateEquationMOT
-from ..atomic.levels import build_rb87_d2_basis
+from ..physics.subdoppler import coherent_six_beam_field, PolarizationGradientModel
 
 
 def load_config(path: str | Path, *, validate: bool = True) -> dict:
@@ -21,6 +21,18 @@ def load_config(path: str | Path, *, validate: bool = True) -> dict:
 
 def validate_config(config: dict) -> None:
     """Reject missing or manifestly unphysical inputs for each fidelity level."""
+    if config.get("model") == "level_d_phase_resolved_pgc":
+        for section in ("atom", "laser", "magnetic_field", "simulation", "output"):
+            if section not in config:
+                raise ValueError(f"Level-D configuration requires {section}")
+        laser, simulation = config["laser"], config["simulation"]
+        if laser["saturation_per_beam"] < 0 or laser["detuning_gamma"] == 0:
+            raise ValueError("PGC saturation must be non-negative and detuning non-zero")
+        if len(laser["phases_rad"]) != 6 or simulation["periods"] <= simulation["discard_periods"]:
+            raise ValueError("PGC requires six phases and periods greater than discarded periods")
+        if simulation["steps_per_period"] < 8 or simulation["velocity_m_per_s"] == 0:
+            raise ValueError("PGC resolution must be >=8 and probe velocity non-zero")
+        return
     if config.get("model") == "level_c_reduced_two_level_obe":
         required = ("atom", "obe", "output")
         if any(section not in config for section in required):
@@ -48,11 +60,12 @@ def validate_config(config: dict) -> None:
 
 
 def build_effective_model(config: dict) -> EffectiveMOTForce:
-    atom = Rb87D2()
+    atom_config = config.get("atom", {"isotope": "87Rb", "line": "D2"})
+    atom = get_atomic_line(atom_config.get("isotope", atom_config.get("species", "87Rb")), atom_config.get("line", "D2"))
     laser = config["laser"]
     beams = six_beam_mot(
         laser["power_per_beam_w"], laser["waist_m"],
-        laser["detuning_gamma"] * atom.gamma, atom.wavelength,
+        laser["detuning_gamma"] * atom.gamma_rad_s, atom.wavelength_m,
     )
     magnetic = config["magnetic_field"]
     quadrupole = IdealQuadrupole(magnetic["radial_gradient_t_per_m"])
@@ -65,7 +78,10 @@ def build_effective_model(config: dict) -> EffectiveMOTForce:
 
 def build_multilevel_model(config: dict) -> MultilevelRateEquationMOT:
     """Build the Level-B cooling+repump population model."""
-    atom = Rb87D2()
+    atom_config = config["atom"]
+    atom = get_atomic_line(atom_config.get("isotope", "87Rb"), atom_config.get("line", "D2"))
+    if not atom.rate_equation_mot or atom.cooling_transition is None:
+        raise ValueError(f"rate-equation MOT is not supported for {atom.isotope} {atom.line}")
     magnetic = config["magnetic_field"]
     field = CompositeField((
         IdealQuadrupole(magnetic["radial_gradient_t_per_m"]),
@@ -75,19 +91,31 @@ def build_multilevel_model(config: dict) -> MultilevelRateEquationMOT:
         ),
     ))
     families = []
-    for section, ground_f, target_f in (("laser", 2, 3), ("repump", 1, 2)):
+    for section, transition in (("laser", atom.cooling_transition), ("repump", atom.repump_transition)):
+        ground_f, target_f = transition
         parameters = config[section]
         beams = six_beam_mot(
             parameters["power_per_beam_w"],
             parameters["waist_m"],
-            parameters["detuning_gamma"] * atom.gamma,
-            atom.wavelength,
+            parameters["detuning_gamma"] * atom.gamma_rad_s,
+            atom.wavelength_m,
         )
         families.extend(BeamFamily(beam, ground_f, target_f, section) for beam in beams)
     return MultilevelRateEquationMOT(
         atom,
-        build_rb87_d2_basis(atom),
+        build_atomic_basis(atom.isotope, atom.line),
         families,
         field,
         np.asarray(config["gravity"]["vector_m_per_s2"], dtype=float),
     )
+
+
+def build_subdoppler_model(config: dict) -> PolarizationGradientModel:
+    """Build the explicitly phase-coherent Level-D F=2 -> F'=3 model."""
+    atom = Rb87D2(); laser = config["laser"]
+    groups = laser.get("coherence_groups", ["all"] * 6)
+    beams = coherent_six_beam_field(atom.wave_number_rad_m, laser["saturation_per_beam"], laser["phases_rad"], groups)
+    ground_f, excited_f = atom.cooling_transition
+    return PolarizationGradientModel(build_atomic_basis(atom.isotope, atom.line), ground_f, excited_f,
+                                     laser["detuning_gamma"] * atom.gamma_rad_s, beams,
+                                     magnetic_field_t=config["magnetic_field"]["uniform_t"])

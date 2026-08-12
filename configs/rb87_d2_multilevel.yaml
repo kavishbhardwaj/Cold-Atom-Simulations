@@ -1,7 +1,7 @@
 model: level_b_multilevel_rate_equation
 atom:
-  species: rb87
-  transition: d2_full_hyperfine_zeeman
+  isotope: 87Rb
+  line: D2
 laser:
   role: cooling
   configuration: six_independent_beams

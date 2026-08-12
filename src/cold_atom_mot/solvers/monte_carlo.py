@@ -37,7 +37,7 @@ def simulate_photon_events(force_model, position, velocity, duration, time_step,
     rng = np.random.default_rng(seed)
     times, saved_positions, saved_velocities = [], [], []
     events = 0
-    recoil = hbar * force_model.atom.wave_number / force_model.atom.mass
+    recoil = hbar * force_model.atom.wave_number_rad_m / force_model.atom.mass_kg
     for step in range(steps + 1):
         time = min(step * time_step, duration)
         if step % store_every == 0 or step == steps:
@@ -47,9 +47,10 @@ def simulate_photon_events(force_model, position, velocity, duration, time_step,
         dt = min(time_step, duration - time)
         rates = force_model.scattering_rates(positions, velocities, time)
         total_rates = rates.sum(axis=1)
-        if np.max(total_rates * dt) > 0.1:
+        event_probability = -np.expm1(-total_rates * dt)
+        if np.max(event_probability) > 0.1:
             raise ValueError("time step too large: total scattering probability exceeds 0.1")
-        scattered = rng.random(len(positions)) < total_rates * dt
+        scattered = rng.random(len(positions)) < event_probability
         indices = np.flatnonzero(scattered)
         for atom_index in indices:
             probabilities = rates[atom_index] / total_rates[atom_index]

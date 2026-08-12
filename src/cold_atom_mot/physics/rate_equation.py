@@ -1,4 +1,4 @@
-"""Level-B incoherent hyperfine/Zeeman rate equations for the 87Rb D2 MOT.
+"""Incoherent hyperfine/Zeeman rate equations for supported D2 MOTs.
 
 This model evolves populations only.  Off-diagonal density-matrix coherences,
 coherent dark states, light shifts and polarization-gradient forces require the
@@ -8,8 +8,7 @@ future OBE/Level-C and phase-resolved/Level-D models.
 from dataclasses import dataclass
 import numpy as np
 from scipy.constants import hbar, physical_constants
-from ..atomic.levels import Rb87D2Basis
-from ..atomic.rb87 import Rb87D2
+from ..atomic.species import AtomicBasis, FineStructureLine
 from ..laser.beam import GaussianBeam
 from ..laser.polarization import spherical_fractions
 
@@ -26,8 +25,8 @@ class BeamFamily:
 
 @dataclass
 class MultilevelRateEquationMOT:
-    atom: Rb87D2
-    basis: Rb87D2Basis
+    atom: FineStructureLine
+    basis: AtomicBasis
     beam_families: list[BeamFamily]
     magnetic_field: object
     gravity: np.ndarray
@@ -46,11 +45,12 @@ class MultilevelRateEquationMOT:
             raise ValueError("Level-B rates currently accept one 3D phase-space point")
         magnetic = np.asarray(self.magnetic_field.field(position, time), dtype=float)
         b_magnitude = np.linalg.norm(magnetic)
-        saturation = np.array([family.beam.intensity(position) / self.atom.saturation_intensity for family in self.beam_families])
+        saturation = np.array([family.beam.intensity(position) / self.atom.saturation_intensity_w_m2 for family in self.beam_families])
         output = np.zeros((len(self.beam_families), len(self.basis.transitions)))
         for bi, family in enumerate(self.beam_families):
             components = self._local_components(family.beam, magnetic)
-            target_offset = self.atom.excited_hyperfine_offsets_hz[family.target_excited_f]
+            target_offset = (self.atom.hyperfine_energy_hz("excited", family.target_excited_f) -
+                             self.atom.hyperfine_energy_hz("excited", max(self.atom.excited_f)))
             for ti, transition in enumerate(self.basis.transitions):
                 ground = self.basis.ground[transition.ground_index]
                 excited = self.basis.excited[transition.excited_index]
@@ -64,7 +64,7 @@ class MultilevelRateEquationMOT:
                 # Saturation emerges from the bidirectional stimulated terms
                 # and finite populations in the rate equations. Adding the
                 # Level-A shared denominator here would count it twice.
-                output[bi, ti] = 0.5 * self.atom.gamma * effective_s / (1.0 + (2 * delta / self.atom.gamma) ** 2)
+                output[bi, ti] = 0.5 * self.atom.gamma_rad_s * effective_s / (1.0 + (2 * delta / self.atom.gamma_rad_s) ** 2)
         return output
 
     def generator(self, position: np.ndarray, velocity: np.ndarray, time: float = 0.0) -> np.ndarray:
@@ -82,8 +82,8 @@ class MultilevelRateEquationMOT:
         for ei, row in enumerate(self.basis.spontaneous_branching):
             source = ng + ei
             for gi, probability in enumerate(row):
-                matrix[gi, source] += self.atom.gamma * probability
-            matrix[source, source] -= self.atom.gamma
+                matrix[gi, source] += self.atom.gamma_rad_s * probability
+            matrix[source, source] -= self.atom.gamma_rad_s
         return matrix
 
     def steady_state(self, position: np.ndarray, velocity: np.ndarray, time: float = 0.0) -> np.ndarray:
@@ -110,12 +110,11 @@ class MultilevelRateEquationMOT:
         return force
 
     def force(self, position: np.ndarray, velocity: np.ndarray, population: np.ndarray | None = None, time: float = 0.0) -> np.ndarray:
-        return self.per_beam_force(position, velocity, population, time).sum(axis=0) + self.atom.mass * np.asarray(self.gravity)
+        return self.per_beam_force(position, velocity, population, time).sum(axis=0) + self.atom.mass_kg * np.asarray(self.gravity)
 
     def manifold_populations(self, population: np.ndarray) -> dict[str, float]:
         ng = len(self.basis.ground)
         return {
-            "ground_F1": float(sum(population[i] for i, state in enumerate(self.basis.ground) if state.F == 1)),
-            "ground_F2": float(sum(population[i] for i, state in enumerate(self.basis.ground) if state.F == 2)),
+            **{f"ground_F{f}": float(sum(population[i] for i, state in enumerate(self.basis.ground) if state.F == f)) for f in self.atom.ground_f},
             "excited": float(population[ng:].sum()),
         }

@@ -9,7 +9,7 @@ coherences, stimulated-force interference, or sub-Doppler forces.
 from dataclasses import dataclass
 import numpy as np
 from scipy.constants import hbar, physical_constants
-from ..atomic.rb87 import Rb87D2
+from ..atomic.species import FineStructureLine
 from ..laser.beam import GaussianBeam
 
 BOHR_MAGNETON = physical_constants["Bohr magneton"][0]
@@ -17,7 +17,7 @@ BOHR_MAGNETON = physical_constants["Bohr magneton"][0]
 
 @dataclass
 class EffectiveMOTForce:
-    atom: Rb87D2
+    atom: FineStructureLine
     beams: list[GaussianBeam]
     magnetic_field: object
     gravity: np.ndarray
@@ -27,18 +27,20 @@ class EffectiveMOTForce:
         position = np.asarray(position, dtype=float)
         velocity = np.asarray(velocity, dtype=float)
         intensities = np.array([beam.intensity(position) for beam in self.beams])
-        saturation = intensities / self.atom.saturation_intensity
+        saturation = intensities / self.atom.saturation_intensity_w_m2
         shared_denominator = 1.0 + np.sum(saturation, axis=0)
         magnetic = np.asarray(self.magnetic_field.field(position, time))
         rates = []
-        for index, (beam, s) in enumerate(zip(self.beams, saturation)):
-            axis = int(np.argmax(abs(beam.direction)))
-            gradient_sign = 1.0 if axis < 2 else -1.0
-            propagation_sign = beam.direction[axis]
-            zeeman = -propagation_sign * gradient_sign * self.effective_magnetic_moment * magnetic[..., axis] / hbar
+        b_magnitude = np.linalg.norm(magnetic, axis=-1)
+        for beam, s in zip(self.beams, saturation):
+            b_hat = np.divide(magnetic, np.expand_dims(b_magnitude, -1),
+                              out=np.zeros_like(magnetic), where=np.expand_dims(b_magnitude > 1e-15, -1))
+            # Circular photon angular momentum projected on the local B axis.
+            q_expectation = beam.polarization_purity * beam.helicity * np.sum(beam.direction * b_hat, axis=-1)
+            zeeman = -self.effective_magnetic_moment * q_expectation * b_magnitude / hbar
             doppler = np.sum(beam.k_vector * velocity, axis=-1)
             delta = beam.detuning + beam.frequency_offset - doppler + zeeman
-            rates.append(0.5 * self.atom.gamma * s / (shared_denominator + (2 * delta / self.atom.gamma) ** 2))
+            rates.append(0.5 * self.atom.gamma_rad_s * s / (shared_denominator + (2 * delta / self.atom.gamma_rad_s) ** 2))
         return np.stack(rates, axis=-1)
 
     def per_beam_force(self, position: np.ndarray, velocity: np.ndarray, time: float = 0.0) -> np.ndarray:
@@ -48,7 +50,7 @@ class EffectiveMOTForce:
 
     def force(self, position: np.ndarray, velocity: np.ndarray, time: float = 0.0) -> np.ndarray:
         optical = np.sum(self.per_beam_force(position, velocity, time), axis=-2)
-        return optical + self.atom.mass * np.asarray(self.gravity)
+        return optical + self.atom.mass_kg * np.asarray(self.gravity)
 
     def linear_coefficients(self, position_step: float = 1e-6, velocity_step: float = 1e-3) -> tuple[np.ndarray, np.ndarray]:
         origin = np.zeros(3)
