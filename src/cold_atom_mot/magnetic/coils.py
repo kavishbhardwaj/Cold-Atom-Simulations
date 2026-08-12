@@ -49,6 +49,10 @@ class CircularCoil:
         result = mu_0 / (4 * np.pi) * self.current * self.turns * np.sum(integrand, axis=1)
         return result.reshape(original_shape)
 
+    @property
+    def is_time_independent(self) -> bool:
+        return True
+
 
 @dataclass(frozen=True)
 class AntiHelmholtzPair:
@@ -82,3 +86,7 @@ class AntiHelmholtzPair:
         initial = np.zeros(3) if guess is None else np.asarray(guess, dtype=float)
         result = least_squares(lambda point: self.field(point), initial, xtol=1e-13, ftol=1e-13, gtol=1e-13)
         return result.x
+
+    @property
+    def is_time_independent(self) -> bool:
+        return self.first.is_time_independent and self.second.is_time_independent

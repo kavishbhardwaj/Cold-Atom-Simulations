@@ -32,9 +32,12 @@ class MultilevelOBE:
     mode: str = "quick"
     ground_relaxation_rate: float = 0.0
     phase_samples: int = 4
+    phase_tolerance: float = 0.01
     _phase_resolved: bool = field(default=False, repr=False)
     _collapses: list = field(default=None, init=False, repr=False)
+    _dissipator: object = field(default=None, init=False, repr=False)
     last_force_convergence: dict | None = field(default=None, init=False, repr=False)
+    last_phase_diagnostics: dict | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
         if self.mode not in ("quick", "research"):
@@ -43,6 +46,8 @@ class MultilevelOBE:
             raise ValueError("ground_relaxation_rate must be non-negative")
         if self.phase_samples < 1:
             raise ValueError("phase_samples must be positive")
+        if self.phase_tolerance <= 0:
+            raise ValueError("phase_tolerance must be positive")
 
     def _coherence_groups(self):
         groups = {}
@@ -121,22 +126,44 @@ class MultilevelOBE:
         return np.asarray([self._laser_offset(f)-carriers[f.ground_f]-np.dot(f.beam.k_vector, velocity)
                            for f in self.beam_families])
 
-    def cross_ground_rwa_bound(self, family):
-        """Conservative population-scale bound for the discarded other-F drive.
+    def cross_ground_rwa_diagnostics(self, family):
+        """Actual-transition bound for the discarded other-ground-F drive.
 
-        The ground-manifold RWA error is bounded by ``(Omega_max/Delta_hfs)^2``;
-        this is deliberately exposed rather than calling the optical coupling
-        graph complete without qualification.
+        Detunings use every generated dipole-allowed transition originating in
+        the discarded ground manifold and the real configured laser frequency.
         """
         other = [f for f in self.basis.line.ground_f if f != family.ground_f]
         if not other:
-            return 0.0
-        splitting = min(abs(2*np.pi*(self.basis.line.hyperfine_energy_hz("ground", f)-
-                                     self.basis.line.hyperfine_energy_hz("ground", family.ground_f)))
-                        for f in other)
+            return {"omega_max_rad_s": 0.0, "delta_min_rad_s": np.inf,
+                    "amplitude_ratio": 0.0, "population_bound": 0.0}
+        laser = self._laser_offset(family)
+        excited_ref = self.basis.line.hyperfine_energy_hz("excited", max(self.basis.line.excited_f))
+        detunings = []
+        for transition in self.basis.transitions:
+            ground = self.basis.ground[transition.ground_index]
+            if ground.F not in other:
+                continue
+            excited = self.basis.excited[transition.excited_index]
+            transition_offset = 2*np.pi*((excited.frequency_offset_hz) -
+                (ground.frequency_offset_hz))
+            detunings.append(abs(laser-transition_offset))
+        delta = min(detunings)
         saturation = family.beam.peak_intensity/self.basis.line.saturation_intensity_w_m2
         omega = self.basis.line.gamma_rad_s*np.sqrt(saturation/2)
-        return float((omega/splitting)**2)
+        ratio = float(omega/delta)
+        return {"omega_max_rad_s": float(omega), "delta_min_rad_s": float(delta),
+                "amplitude_ratio": ratio, "population_bound": ratio**2}
+
+    def cross_ground_rwa_bound(self, family):
+        """Backward-compatible population bound for the ground-manifold RWA."""
+        return self.cross_ground_rwa_diagnostics(family)["population_bound"]
+
+    def is_hamiltonian_time_independent(self, velocity=(0, 0, 0), *, tolerance=None):
+        """Determine stationarity from declared physical sources, never samples."""
+        tolerance = tolerance or 1e-9*self.basis.line.gamma_rad_s
+        optical_static = np.all(np.abs(self.retained_beat_frequencies(velocity)) <= tolerance)
+        magnetic_static = getattr(self.magnetic_field, "is_time_independent", False)
+        return bool(optical_static and magnetic_static)
 
     def _beam_coupling(self, family, position, velocity, time, phase_shift=0.0):
         """Return one beam's RWA coupling matrix, including its trajectory phase."""
@@ -195,13 +222,17 @@ class MultilevelOBE:
         h = csr_matrix(self.hamiltonian(position, velocity, time)); n = h.shape[0]
         ident = eye(n, format="csr", dtype=complex)
         operator = -1j*(kron(ident, h)-kron(h.T, ident))
-        for collapse in self.collapse_operators()+self._ground_relaxation_operators():
-            cd_c = collapse.getH()@collapse
-            operator += kron(collapse.conjugate(), collapse)-.5*kron(ident, cd_c)-.5*kron(cd_c.T, ident)
+        if self._dissipator is None:
+            dissipator = csr_matrix((n*n, n*n), dtype=complex)
+            for collapse in self.collapse_operators()+self._ground_relaxation_operators():
+                cd_c = collapse.getH()@collapse
+                dissipator += kron(collapse.conjugate(), collapse)-.5*kron(ident, cd_c)-.5*kron(cd_c.T, ident)
+            self._dissipator = dissipator.tocsr()
+        operator += self._dissipator
         return operator.tocsr()
 
-    def steady_state(self, position=(0, 0, 0), velocity=(0, 0, 0), time=0.0):
-        """Instantaneous stationary state (appropriate for a stationary Hamiltonian).
+    def steady_state_realization(self, position=(0, 0, 0), velocity=(0, 0, 0), time=0.0):
+        """Stationary state of one explicitly phase-resolved realization.
 
         Multi-frequency/multi-direction moving configurations should use
         :meth:`evolve` and time-average :meth:`per_beam_force` instead.
@@ -210,6 +241,8 @@ class MultilevelOBE:
         if len(effective) and not np.allclose(effective, 0, rtol=0,
                                               atol=1e-9*self.basis.line.gamma_rad_s):
             raise ValueError("no stationary rotating frame: use evolve() for unequal laser/Doppler frequencies")
+        if not getattr(self.magnetic_field, "is_time_independent", False):
+            raise ValueError("magnetic field is not explicitly time independent: use evolve()")
         n = self.basis.state_count
         h = self.hamiltonian(position, velocity, time)
         ident = eye(n, format="csr", dtype=complex); hs = csr_matrix(h)
@@ -231,6 +264,41 @@ class MultilevelOBE:
             return self.long_time_state(position, velocity)
         return rho
 
+    def _phase_average(self, observable, *, base_samples=None):
+        """Refine deterministic phase ensembles and return value plus diagnostics."""
+        groups = self._coherence_groups()
+        if len(groups) <= 1 or self._phase_resolved:
+            return observable(self), {"coherence_groups": len(groups), "phase_samples": 1,
+                                      "relative_change": 0.0, "converged": True}
+        n = max(base_samples or self.phase_samples, len(groups)+1)
+        previous = np.mean([observable(self._phase_realization(i, n)) for i in range(n)], axis=0)
+        refinements = 2 if self.mode == "research" else 1
+        change = np.inf
+        for _ in range(refinements):
+            n *= 2
+            current = np.mean([observable(self._phase_realization(i, n)) for i in range(n)], axis=0)
+            scale = max(np.linalg.norm(current), np.linalg.norm(previous), 1e-30)
+            change = float(np.linalg.norm(current-previous)/scale)
+            previous = current
+        diagnostics = {"coherence_groups": len(groups), "phase_samples": n,
+                       "relative_change": change, "converged": change <= self.phase_tolerance}
+        if self.mode == "research" and not diagnostics["converged"]:
+            raise RuntimeError(f"incoherent phase average not converged: relative change {change:.3g}")
+        return previous, diagnostics
+
+    def phase_averaged_steady_state(self, position=(0, 0, 0), velocity=(0, 0, 0), time=0.0):
+        """Physical ensemble density matrix for mutually incoherent groups."""
+        state, diagnostics = self._phase_average(
+            lambda realization: realization.steady_state_realization(position, velocity, time))
+        self.last_phase_diagnostics = diagnostics
+        return state
+
+    def steady_state(self, position=(0, 0, 0), velocity=(0, 0, 0), time=0.0):
+        """Return a phase average, refusing ambiguity for incoherent apparatus."""
+        if len(self._coherence_groups()) > 1 and not self._phase_resolved:
+            return self.phase_averaged_steady_state(position, velocity, time)
+        return self.steady_state_realization(position, velocity, time)
+
     def evolve(self, position, velocity, times, rho0=None, *, rtol=None, atol=None,
                max_step=np.inf, return_diagnostics=False):
         """Integrate the explicitly time-dependent master equation."""
@@ -242,12 +310,10 @@ class MultilevelOBE:
             rho0 = np.zeros((n, n), complex)
             rho0[np.arange(len(self.basis.ground)), np.arange(len(self.basis.ground))] = 1/len(self.basis.ground)
         tolerances = (2e-5, 2e-8) if self.mode == "quick" else (2e-7, 2e-10)
-        # Avoid rebuilding a 576x576 sparse operator at every RHS evaluation
-        # when the block-frame Hamiltonian is actually stationary.  The endpoint
-        # comparison also protects explicitly time-dependent magnetic fields.
-        h0 = self.hamiltonian(position, velocity, times[0])
-        h1 = self.hamiltonian(position, velocity, times[-1])
-        fixed = self.liouvillian(position, velocity, times[0]) if np.allclose(h0, h1, rtol=1e-12, atol=1e-7) else None
+        # Cache only when all known physical sources explicitly declare
+        # stationarity. Equal endpoints do not establish this for periodic H(t).
+        stationary = self.is_hamiltonian_time_independent(velocity)
+        fixed = self.liouvillian(position, velocity, times[0]) if stationary else None
         rhs = ((lambda _t, y: fixed@y) if fixed is not None else
                (lambda t, y: self.liouvillian(position, velocity, t)@y))
         solution = solve_ivp(rhs,
@@ -265,7 +331,8 @@ class MultilevelOBE:
             steps = np.diff(solution.t)
             diagnostics = {"internal_steps": len(steps), "min_step_s": float(steps.min()),
                            "max_step_s": float(steps.max()), "median_step_s": float(np.median(steps)),
-                           "retained_max_beat_rad_s": float(np.max(np.abs(self.retained_beat_frequencies(velocity)), initial=0))}
+                           "retained_max_beat_rad_s": float(np.max(np.abs(self.retained_beat_frequencies(velocity)), initial=0)),
+                           "fixed_liouvillian": stationary}
             return density, diagnostics
         return density
 
@@ -308,6 +375,19 @@ class MultilevelOBE:
         operators = self.force_operators(position, velocity, time)
         return np.real(np.einsum("ba,ikab->ik", rho, operators))
 
+    def _window_average(self, values, *, lifetimes=None, samples=None):
+        """Average the last window and enforce the RESEARCH convergence policy."""
+        values = np.asarray(values); split = len(values)//2
+        early, late = values[:split].mean(axis=0), values[split:].mean(axis=0)
+        scale = max(np.linalg.norm(late), np.max(np.linalg.norm(values, axis=1)), 1e-30)
+        metric = float(np.linalg.norm(late-early)/scale)
+        self.last_force_convergence = {"relative_window_change": metric,
+                                       "lifetimes": lifetimes, "samples": samples,
+                                       "averaging_fraction": 0.25}
+        if self.mode == "research" and metric > 0.01:
+            raise RuntimeError(f"time-averaged force not converged: relative window change {metric:.3g}")
+        return late
+
     def force(self, position, velocity, rho=None, time=0.0):
         """Return ``(Fx,Fy,Fz)``.
 
@@ -322,14 +402,10 @@ class MultilevelOBE:
             return self.per_beam_force(position, velocity, rho, time).sum(axis=0)
         groups = self._coherence_groups()
         if len(groups) > 1 and not self._phase_resolved:
-            # Phase cycling is the ensemble definition of mutually incoherent
-            # lasers.  It removes cross-group interference without discarding
-            # each group's coherent internal-state dynamics.
-            # N>number of groups makes all pairwise roots-of-unity cross terms
-            # vanish exactly (rather than relying on random-phase luck).
-            samples = max(self.phase_samples, len(groups)+1)
-            return np.mean([self._phase_realization(i, samples).force(position, velocity, time=time)
-                            for i in range(samples)], axis=0)
+            value, diagnostics = self._phase_average(
+                lambda realization: realization.force(position, velocity, time=time))
+            self.last_phase_diagnostics = diagnostics
+            return value
         try:
             state = self.steady_state(position, velocity, time)
             return self.per_beam_force(position, velocity, state, time).sum(axis=0)
@@ -341,13 +417,4 @@ class MultilevelOBE:
             middle = samples//2
             values = np.asarray([self.per_beam_force(position, velocity, density[i], times[i]).sum(axis=0)
                                  for i in range(middle, samples)])
-            split = len(values)//2
-            early, late = values[:split].mean(axis=0), values[split:].mean(axis=0)
-            scale = max(np.linalg.norm(late), np.max(np.linalg.norm(values, axis=1)), 1e-30)
-            metric = float(np.linalg.norm(late-early)/scale)
-            self.last_force_convergence = {"relative_window_change": metric,
-                                           "lifetimes": lifetimes, "samples": samples,
-                                           "averaging_fraction": 0.25}
-            if self.mode == "research" and metric > 0.01:
-                raise RuntimeError(f"time-averaged force not converged: relative window change {metric:.3g}")
-            return late
+            return self._window_average(values, lifetimes=lifetimes, samples=samples)

@@ -29,6 +29,10 @@ class IdealQuadrupole:
         del position
         return self.gradient.copy()
 
+    @property
+    def is_time_independent(self) -> bool:
+        return True
+
 
 @dataclass(frozen=True)
 class ResidualField:
@@ -42,6 +46,10 @@ class ResidualField:
         points = np.asarray(positions, dtype=float)
         oscillation = self.ac_amplitude * np.sin(2 * np.pi * self.ac_frequency * time + self.ac_phase)
         return points @ np.asarray(self.gradient).T + np.asarray(self.uniform) + oscillation
+
+    @property
+    def is_time_independent(self) -> bool:
+        return self.ac_frequency == 0.0 or not np.any(self.ac_amplitude)
 
 
 @dataclass(frozen=True)
@@ -59,3 +67,8 @@ class CompositeField:
             offset[axis] = step
             result[:, axis] = (self.field(point + offset) - self.field(point - offset)) / (2 * step)
         return result
+
+    @property
+    def is_time_independent(self) -> bool:
+        return all(getattr(component, "is_time_independent", False)
+                   for component in self.components)

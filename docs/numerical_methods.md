@@ -164,15 +164,19 @@ retained beat is zero. At speed `v`, counterpropagating beams retain a largest
 angular beat `2 k v` (2.56 MHz in cycles/s at 1 m/s), which `evolve` resolves
 with adaptive steps; its diagnostics report minimum, median, and maximum
 internal steps, and callers can impose `max_step` and refine tolerances.
+Liouvillian caching is enabled only when all retained optical beats vanish and
+the magnetic-field object explicitly declares `is_time_independent`. Equality
+of sampled endpoints is never used to infer stationarity.
 
 The block transformation makes transverse magnetic matrix elements between F=1
 and F=2 oscillate at the ground hyperfine splitting. Those elements are dropped
 by a secular approximation, while the full vector Zeeman Hamiltonian is retained
 within each F and throughout the excited manifold. The omitted amplitude scales
 as `mu_B B/(hbar Delta_hfs)` (about `2e-5` at 10 microtesla). Likewise each optical
-carrier drives only its selected ground F. `cross_ground_rwa_bound()` reports the
-conservative population-scale bound `(Omega_max/Delta_hfs)^2`; it is below
-`2e-5` for every beam in the reference configuration. Thus “24-state” describes
+carrier drives only its selected ground F. `cross_ground_rwa_diagnostics()`
+uses the smallest actual optical detuning over every generated discarded
+transition and reports both `Omega_max/Delta_min` and its square. The amplitude
+ratio is below 1% for every reference beam. Thus “24-state” describes
 the density matrix and complete excited-hyperfine coupling, not an unqualified
 all-frequency/all-ground optical graph.
 
@@ -183,6 +187,12 @@ removed, within-group differences are retained, and observables are averaged
 over group phases. This distinguishes six independent beams, three coherent
 counterpropagating pairs, and one fully coherent six-beam field without treating
 unrelated MOT lasers as one phase-stable field.
+Pairwise roots-of-unity cancellation is only the starting ensemble. QUICK
+compares `N` and `2N`; RESEARCH compares `N`, `2N`, and `4N`, rejecting a result
+whose final refinement exceeds `phase_tolerance` (1% by default). Diagnostics
+record group count, samples, relative change, and convergence. The API names the
+distinction: `steady_state_realization` is fixed-phase, while
+`phase_averaged_steady_state` returns the incoherent ensemble.
 
 The per-beam force is evaluated as `-hbar Tr(rho gradient(H_i/hbar))`. The
 implemented analytic gradient contains `i k_i` from the travelling-wave phase

@@ -1,9 +1,11 @@
 import numpy as np
 import pytest
 from dataclasses import replace
+from scipy.constants import hbar
 
 from cold_atom_mot.io.config import build_multilevel_model, load_config
 from cold_atom_mot.physics.multilevel_obe import MultilevelOBE
+from cold_atom_mot.magnetic.fields import ResidualField
 
 
 def solver():
@@ -62,7 +64,8 @@ def test_off_resonant_excited_hyperfine_couplings_are_present():
 def full_solver(*, phase_samples=2):
     rate = build_multilevel_model(load_config("configs/rb87_d2_multilevel.yaml"))
     return MultilevelOBE(rate.basis, rate.beam_families, rate.magnetic_field,
-                         phase_samples=phase_samples)
+                         phase_samples=phase_samples,
+                         ground_relaxation_rate=1e-6*rate.atom.gamma_rad_s)
 
 
 def test_six_cooling_plus_six_repump_block_frame_and_short_evolution():
@@ -80,9 +83,11 @@ def test_six_cooling_plus_six_repump_block_frame_and_short_evolution():
     np.testing.assert_allclose(density, density.swapaxes(1, 2).conj(), atol=2e-9)
     assert min(np.linalg.eigvalsh(r).min() for r in density) > -2e-7
     assert diagnostics["max_step_s"] <= 0.21/obe.basis.line.gamma_rad_s
-    stationary = obe.steady_state(np.zeros(3), np.zeros(3))
+    stationary = obe.phase_averaged_steady_state(np.zeros(3), np.zeros(3))
     assert np.trace(stationary) == pytest.approx(1)
     assert np.linalg.eigvalsh(stationary).min() > -2e-9
+    assert obe.last_phase_diagnostics["phase_samples"] >= 2*13
+    assert "converged" in obe.last_phase_diagnostics
 
 
 def test_incoherent_group_phase_is_invariant_but_coherent_pair_is_phase_sensitive():
@@ -121,6 +126,7 @@ def test_analytic_interaction_gradient_matches_finite_difference():
 def test_ground_manifold_rwa_bound_is_small_and_regularizer_is_explicit():
     obe = full_solver()
     assert max(obe.cross_ground_rwa_bound(f) for f in obe.beam_families) < 2e-5
+    obe = replace(obe, ground_relaxation_rate=0)
     assert obe.ground_relaxation_rate == 0
     with pytest.raises(ValueError, match="non-negative"):
         replace(obe, ground_relaxation_rate=-1)
@@ -128,3 +134,73 @@ def test_ground_manifold_rwa_bound_is_small_and_regularizer_is_explicit():
     rho_zero = obe.steady_state(np.zeros(3), np.zeros(3))
     rho_tiny = tiny.steady_state(np.zeros(3), np.zeros(3))
     np.testing.assert_allclose(rho_zero, rho_tiny, atol=2e-7)
+    diagnostics = [obe.cross_ground_rwa_diagnostics(f) for f in obe.beam_families]
+    assert max(d["amplitude_ratio"] for d in diagnostics) < 0.01
+    assert all(d["population_bound"] == pytest.approx(d["amplitude_ratio"]**2)
+               for d in diagnostics)
+
+
+def test_periodic_optical_beat_with_equal_endpoints_is_not_cached():
+    base = solver(); first = base.beam_families[0]
+    beat = 2*np.pi*2.0e6
+    second = replace(first, beam=replace(first.beam, frequency_offset=beat,
+                                         coherence_group="beat"))
+    first = replace(first, beam=replace(first.beam, coherence_group="beat"))
+    obe = MultilevelOBE(base.basis, [first, second], base.magnetic_field,
+                        ground_relaxation_rate=base.ground_relaxation_rate)
+    period = 2*np.pi/beat
+    np.testing.assert_allclose(obe.hamiltonian(np.zeros(3), time=0),
+                               obe.hamiltonian(np.zeros(3), time=period), rtol=0, atol=2e-7)
+    assert not np.allclose(obe.hamiltonian(np.zeros(3), time=period/4),
+                             obe.hamiltonian(np.zeros(3), time=0))
+    _, diagnostics = obe.evolve(np.zeros(3), np.zeros(3), [0, period],
+                                return_diagnostics=True, max_step=period/8)
+    assert not diagnostics["fixed_liouvillian"]
+
+
+def test_periodic_ac_magnetic_field_with_equal_endpoints_is_not_cached():
+    base = solver(); frequency = 1.0e6; period = 1/frequency
+    magnetic = ResidualField(ac_amplitude=np.array([2e-6, 0, 0]),
+                             ac_frequency=frequency, ac_phase=0)
+    obe = replace(base, magnetic_field=magnetic)
+    np.testing.assert_allclose(obe.hamiltonian(np.zeros(3), time=0),
+                               obe.hamiltonian(np.zeros(3), time=period), atol=1e-5)
+    assert not np.allclose(obe.hamiltonian(np.zeros(3), time=period/4),
+                             obe.hamiltonian(np.zeros(3), time=0))
+    _, diagnostics = obe.evolve(np.zeros(3), np.zeros(3), [0, period],
+                                return_diagnostics=True, max_step=period/8)
+    assert not diagnostics["fixed_liouvillian"]
+
+
+def test_single_travelling_wave_force_equals_momentum_times_decay_rate():
+    obe = solver(); rho = obe.steady_state_realization(np.zeros(3), np.zeros(3))
+    ng = len(obe.basis.ground)
+    excited = np.trace(rho[ng:, ng:]).real
+    force = obe.force(np.zeros(3), np.zeros(3), rho=rho)
+    expected = hbar*obe.beam_families[0].beam.k_vector*obe.basis.line.gamma_rad_s*excited
+    relative = np.linalg.norm(force-expected)/np.linalg.norm(expected)
+    assert relative < 2e-4
+
+
+def test_retained_mhz_beat_timestep_and_tolerance_convergence():
+    base = solver(); first = base.beam_families[0]; beat = 2*np.pi*10e6
+    families = [replace(first, beam=replace(first.beam, coherence_group="pair")),
+                replace(first, beam=replace(first.beam, frequency_offset=beat,
+                                            coherence_group="pair", phase=.4))]
+    obe = MultilevelOBE(base.basis, families, base.magnetic_field,
+                        ground_relaxation_rate=base.ground_relaxation_rate)
+    period = 2*np.pi/beat; times = np.linspace(0, 3*period, 25)
+    coarse = obe.evolve(np.zeros(3), np.zeros(3), times, rtol=2e-5, atol=2e-8,
+                        max_step=period/8)
+    fine = obe.evolve(np.zeros(3), np.zeros(3), times, rtol=2e-7, atol=2e-10,
+                      max_step=period/16)
+    assert np.linalg.norm(coarse[-1]-fine[-1]) < 2e-4
+    short = np.mean([obe.force(np.zeros(3), np.zeros(3), rho=r, time=t)
+                     for r, t in zip(fine[-8:], times[-8:])], axis=0)
+    long = np.mean([obe.force(np.zeros(3), np.zeros(3), rho=r, time=t)
+                    for r, t in zip(fine[-16:-8], times[-16:-8])], axis=0)
+    assert np.linalg.norm(short-long)/max(np.linalg.norm(long), 1e-30) < 0.2
+    research = replace(obe, mode="research")
+    with pytest.raises(RuntimeError, match="not converged"):
+        research._window_average([[1.0, 0, 0], [1.0, 0, 0],
+                                  [-1.0, 0, 0], [-1.0, 0, 0]])
