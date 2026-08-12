@@ -1,116 +1,123 @@
 # Cold-atom and magneto-optical-trap simulations
 
-A reproducible SI-unit Python framework for rubidium spectroscopy, realistic
-six-beam MOT apparatus, semiclassical and multilevel light forces, optical Bloch
-benchmarks, polarization-gradient cooling, stochastic recoil, capture, and
-configurable vapour loading/loss. **87Rb D2 is the default reference MOT**, but
-the atomic engine generates the full hyperfine/Zeeman structure of 85Rb and
-87Rb on both D lines.
+A reproducible SI-unit Python framework for **rubidium MOTs, laser cooling, and cold-atom apparatus modelling**. The default reference system is **87Rb D2**, with generated hyperfine/Zeeman structure, six physical laser beams, magnetic coils and residual fields, multilevel light-force models, optical Bloch equations, polarization-gradient cooling, trajectories, vapour loading, experimental sequences, and optional collective-cloud physics.
 
-This is inspectable scientific software, not a calibrated prediction of a
-particular experiment. Every solver documents what it neglects.
+The goal is to connect atomic physics to laboratory-level questions while keeping every approximation visible. This repository is **not a calibrated digital twin of a particular experiment by default**: measured apparatus parameters and externally validated high-fidelity cooling models are still required for quantitative temperature, atom-number, and tolerance predictions.
 
-## Atomic and solver support
+## What is trustworthy today?
 
-| System | Atomic basis/data | Effective MOT | Rate-equation MOT | Multilevel OBE | Polarization gradient / gray molasses |
-|---|---:|---:|---:|---:|---:|
-| **87Rb D2** | full | yes | **F=2→F′=3**, repump **F=1→F′=2** | sparse framework; research-scale validation pending | adiabatic F=2→F′=3 population model |
-| **85Rb D2** | full | yes | **F=3→F′=4**, repump **F=2→F′=3** | operator framework | not validated |
-| 87Rb D1 | full | line benchmark only | no conventional closed-cycle MOT | operator framework | gray molasses not implemented |
-| 85Rb D1 | full | line benchmark only | no conventional closed-cycle MOT | operator framework | gray molasses not implemented |
+**Implemented** means the model exists and has internal tests. **Externally verified** means a matched result agrees with an independent implementation. **Experimentally calibrated** would require measured apparatus inputs and quantitative agreement with a specified experiment.
 
-D2 provides the convenient stretched cycling transition used by conventional
-MOTs. D1 is not inferior: its Λ systems, Raman coherence and dark states are
-central to gray molasses, but those require a coherently validated solver and
-are not faked here. See [atomic systems](docs/atomic_systems.md).
-
-## Physical model hierarchy
-
-| Capability | Purpose and approximation |
+| Capability | Current status |
 |---|---|
-| Foundations | Ballistics, thermal distributions, Gaussian propagation and dipole traps |
-| Effective semiclassical MOT | Fast shared-saturation Doppler/Zeeman force and trajectories |
-| Multilevel rate equations | Generated hyperfine/Zeeman populations, cooling and repump; no coherences |
-| Two-level OBE benchmark | Exact analytical/numerical coherence benchmark |
-| Sparse multilevel OBE | Exact vector hyperfine–Zeeman Hamiltonian and collapse operators; full six-beam validation remains |
-| Polarization-gradient model | Phase/coherence-group-resolved light shifts, pumping and Sisyphus force; populations only |
-| Photon-event Monte Carlo | Exact ≥1 Poisson-event probability per step, absorption and spontaneous recoil |
-| Capture and loading/loss | Thermal surface-flux trajectories, isotope-resolved loading, and calibrated loss inputs |
+| Two-level OBE, Rabi dynamics, spontaneous decay | **Analytically + QuTiP verified** |
+| Normalized 1-D two-beam Doppler force | **PyLCP verified** |
+| 87Rb ground hyperfine–Zeeman spectrum | **PyLCP verified** |
+| 24-state moving 87Rb D2 OBE | **Implemented + internally tested; external multilevel validation pending** |
+| Polarization-gradient cooling | **Mechanism/trends implemented; quantitative OBE-consistent temperature pending** |
+| Six-beam optics, coils, sequence timing, capture/loading | **Implemented + internally tested; apparatus calibration dependent** |
+| Collective Gaussian MOT / multiple scattering | **Optional mean-field model; literature-trend verified, not experimentally calibrated** |
 
-Detailed equations and boundaries: [model hierarchy](docs/model_hierarchy.md),
-[cooling physics](docs/cooling_physics.md), [numerics](docs/numerical_methods.md),
-and [validation](docs/validation.md).
-Time-dependent laboratory controls are described in [experimental sequences](docs/experimental_sequences.md).
-Independent physical beams and Jones optics are described in [six-beam apparatus](docs/six_beam_apparatus.md).
-Bias compensation, coil imperfections, and switching fields are described in [magnetic apparatus](docs/magnetic_apparatus.md).
-Optional Gaussian-cloud loading, shadowing, and multiple scattering are described in [collective MOT physics](docs/collective_mot.md).
+Independent benchmarks use **no fitted parameters**. In the matched tests, the two-level steady-state population agrees with QuTiP to `5.55e-17`, the normalized two-beam force agrees with PyLCP to a maximum relative difference of about `7.9e-15`, and the 87Rb ground Zeeman spectrum agrees with PyLCP within about `0.57 Hz` over the tested fields. Full conventions and limits are in [validation](docs/validation.md).
 
-## Validation status
+## What is modelled?
 
-| Benchmark | Status |
+| Layer | Purpose |
 |---|---|
-| Two-level OBE vs analytic formulas and QuTiP | **ANALYTICALLY / INDEPENDENT-SOFTWARE VERIFIED** |
-| Normalized 1-D two-beam force vs PyLCP | **INDEPENDENT-SOFTWARE VERIFIED** |
-| 87Rb ground vector-Zeeman spectrum vs PyLCP | **INDEPENDENT-SOFTWARE VERIFIED** |
-| Full 24-state OBE forces/populations vs external software | **NOT YET VALIDATED** |
-| PGC mechanism vs primary theory | **LITERATURE-TREND VERIFIED** |
-| Quantitative 87Rb MOT/PGC experiment | **NOT YET VALIDATED** |
+| Atomic structure | 85Rb/87Rb D1/D2 hyperfine and Zeeman bases, Wigner-generated transitions |
+| Effective MOT | Fast Doppler/Zeeman force, trajectories, capture studies |
+| Multilevel rate equations | Cooling + repump populations and optical pumping |
+| 24-state moving OBE | Vector Zeeman Hamiltonian, coherences, beam-resolved Doppler shifts and forces |
+| Polarization-gradient model | Phase-resolved light shifts, pumping and Sisyphus force |
+| Six-beam apparatus | Independent beams, Gaussian propagation, Jones optics, QWP errors, retroreflection |
+| Magnetic apparatus | Anti-Helmholtz/Helmholtz coils, three-axis compensation, gradients, AC fields, eddy currents |
+| Experimental sequence | MOT load → CMOT → field switch-off → settling → PGC/molasses → TOF |
+| Capture/loading | Thermal surface flux, trajectory-derived capture, loading/loss equations |
+| Collective MOT | Optional Gaussian density, two-body loss, shadowing, multiple scattering, radiation-trapping proxy |
 
-Exact conventions, numerical residuals, unmatched assumptions, and citations
-are in [validation](docs/validation.md).
+For 87Rb D2 the atomic basis contains the full **8 ground + 16 excited = 24 hyperfine-Zeeman states**. The moving OBE is implemented, but the repository deliberately does not label the complete multilevel force or PGC temperature as externally validated yet.
+
+D1 structure is generated, but D1 gray molasses is **not** faked: Raman dark-state physics still needs a dedicated coherent implementation and validation.
 
 ## Selected results
 
-| Multilevel force and populations | Polarization-gradient force |
+| Independent software validation | Exact vector Zeeman structure |
 |---|---|
-| ![Effective and multilevel force](results/multilevel/effective_vs_multilevel_force.png) | ![Sub-Doppler and Doppler forces](results/polarization_gradient/subdoppler_force_velocity.png) |
+| ![QuTiP and PyLCP validation](results/validation/independent_software_comparison.png) | ![Exact Zeeman spectra](results/atomic_structure/exact_zeeman_spectra.png) |
 
-| Damping versus power | Beam-waist capture tradeoff |
+| Six physical MOT beams | Three-axis magnetic apparatus |
 |---|---|
-| ![Damping and scattering](results/parameter_studies/damping_power_physics.png) | ![Waist and capture](results/parameter_studies/beam_waist_capture.png) |
+| ![Six-beam apparatus](results/laser_apparatus/six_beam_apparatus.png) | ![Magnetic field maps](results/magnetic_apparatus/compensated_field_maps.png) |
 
-| Physical anti-Helmholtz field | Deterministic trajectories |
+| Polarization-gradient force | Experimental sequence |
 |---|---|
-| ![Coil field](results/effective_mot/antihelmholtz_field.png) | ![Trajectories](results/effective_mot/deterministic_trajectories.png) |
+| ![Sub-Doppler force](results/polarization_gradient/subdoppler_force_velocity.png) | ![Sequence timeline](results/sequence/sequence_timeline.png) |
 
-| Vapour capture and loading | Loading-loss sensitivity |
+| Vapour capture/loading | Collective MOT mean field |
 |---|---|
-| ![Vapour pressure, capture, and loading](results/capture_loading/vapor_capture_loading.png) | ![Loading curves under calibrated loss rates](results/capture_loading/loading_loss_sensitivity.png) |
+| ![Vapour loading](results/capture_loading/vapor_capture_loading.png) | ![Collective MOT diagnostics](results/collective_mot/collective_mot_diagnostics.png) |
 
-All captions, held-fixed parameters, SVG alternatives, NPZ data and limitations
-are in the **[results gallery](results/README.md)**.
+See the **[scientific results gallery](results/README.md)** for captions, numerical data, provenance, held-fixed parameters, and fidelity limits.
+
+## Repository guide
+
+Start with the [documentation map](docs/README.md). The main technical references are:
+
+- [Model hierarchy](docs/model_hierarchy.md) — what each solver includes and neglects.
+- [Validation](docs/validation.md) — independent checks, error metrics, and remaining validation gates.
+- [Cooling physics](docs/cooling_physics.md) — force, optical pumping, recoil, and PGC assumptions.
+- [Six-beam apparatus](docs/six_beam_apparatus.md) — real beam geometry, Jones optics, and imperfections.
+- [Magnetic apparatus](docs/magnetic_apparatus.md) — compensation coils, stray fields, switching and eddy currents.
+- [Experimental sequences](docs/experimental_sequences.md) — time-dependent laboratory cycle.
+- [Collective MOT physics](docs/collective_mot.md) — optional density-dependent mean-field extension.
 
 ## Reproduce
 
 ```bash
 python -m pip install -r requirements-dev.txt
+
 python -m cold_atom_mot simulate configs/rb87_d2_mot.yaml
 python -m cold_atom_mot rate-equation configs/rb87_d2_multilevel.yaml
 python -m cold_atom_mot obe configs/rb87_d2_two_level_obe.yaml
 python -m cold_atom_mot subdoppler configs/rb87_d2_polarization_gradient.yaml
 python -m cold_atom_mot loading configs/rb_vapor_loading.yaml
-
-python examples/generate_foundations.py
-python examples/generate_effective_mot_results.py
-python examples/generate_multilevel_results.py
-python examples/generate_optical_bloch_results.py
-python examples/generate_polarization_gradient_results.py
-python examples/generate_parameter_studies.py
-python examples/generate_capture_loading_results.py
 ```
+
+Generate representative results:
+
+```bash
+python examples/generate_vector_zeeman_results.py
+python examples/generate_six_beam_apparatus_results.py
+python examples/generate_magnetic_apparatus_results.py
+python examples/generate_sequence_results.py
+python examples/generate_capture_loading_results.py
+python examples/generate_collective_mot_results.py
+```
+
+Independent validation requires the pinned optional packages:
+
+```bash
+python -m pip install -r requirements-validation.txt
+python examples/generate_external_validation_results.py
+```
+
+Run the test suite with:
+
+```bash
+python -m pytest -q
+```
+
+Expensive research grids are intentionally not part of CI.
 
 ## Package map
 
 ```text
-atomic/       isotope, line, hyperfine basis and Wigner-generated transitions
-laser/        Gaussian beams, polarization and coherence groups
-magnetic/     quadrupoles, residual fields and segmented Biot–Savart coils
-physics/      effective force, rate equations, OBEs and polarization gradients
+atomic/       isotopes, D lines, hyperfine/Zeeman bases, Wigner transitions
+laser/        physical Gaussian beams, polarization, Jones optics, apparatus
+magnetic/     quadrupoles, residual fields, Helmholtz/anti-Helmholtz coils
+physics/      effective force, rate equations, OBEs, PGC, collective mean field
 solvers/      deterministic and photon-event trajectories
-simulation/   explicit capture criteria and ensemble metrics
+simulation/   capture criteria, ensembles, experimental sequences
 vacuum.py     Rb vapour pressure/density and configurable loading/loss
-foundations.py ballistic, thermal, Gaussian and dipole-trap benchmarks
+foundations.py ballistic, thermal, Gaussian-beam and dipole-trap benchmarks
 ```
-
-CI deliberately uses `python -m pytest -q`; expensive research grids are not run
-in CI.
