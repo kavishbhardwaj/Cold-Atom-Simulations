@@ -1,6 +1,7 @@
 """Propagation-relative polarization and local spherical-basis utilities."""
 
 import numpy as np
+from dataclasses import dataclass
 
 
 def unit(vector: np.ndarray) -> np.ndarray:
@@ -44,3 +45,44 @@ def spherical_fractions(polarization: np.ndarray, quantization_axis: np.ndarray)
     fractions = {q: float(abs(np.vdot(component, epsilon)) ** 2) for q, component in basis.items()}
     total = sum(fractions.values())
     return {q: value / total for q, value in fractions.items()}
+
+
+def jones_rotation(angle):
+    """Real rotation in a beam's transverse Jones basis."""
+    return np.array([[np.cos(angle), -np.sin(angle)],
+                     [np.sin(angle), np.cos(angle)]], complex)
+
+
+@dataclass(frozen=True)
+class JonesElement:
+    """Lossless retarder, or an ideal linear polarizer, in radians."""
+    kind: str
+    angle: float = 0.0
+    retardance: float | None = None
+    retardance_error: float = 0.0
+
+    def matrix(self):
+        rotation = jones_rotation(self.angle)
+        if self.kind == "polarizer":
+            native = np.diag([1, 0]).astype(complex)
+        else:
+            nominal = {"quarter_wave": np.pi/2, "half_wave": np.pi,
+                       "retarder": self.retardance}.get(self.kind)
+            if nominal is None:
+                raise ValueError("Jones element must be polarizer, quarter_wave, half_wave, or retarder")
+            native = np.diag([np.exp(-.5j*(nominal+self.retardance_error)),
+                              np.exp(.5j*(nominal+self.retardance_error))])
+        return rotation @ native @ rotation.T
+
+
+def propagate_jones(initial, elements=()):
+    """Propagate and normalize a two-component Jones vector."""
+    vector = np.asarray(initial, complex)
+    if vector.shape != (2,):
+        raise ValueError("Jones vector must have two components")
+    for element in elements:
+        vector = element.matrix() @ vector
+    norm = np.linalg.norm(vector)
+    if norm == 0:
+        raise ValueError("optical train extinguishes the input")
+    return vector/norm

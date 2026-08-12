@@ -36,11 +36,17 @@ class EffectiveMOTForce:
             b_hat = np.divide(magnetic, np.expand_dims(b_magnitude, -1),
                               out=np.zeros_like(magnetic), where=np.expand_dims(b_magnitude > 1e-15, -1))
             # Circular photon angular momentum projected on the local B axis.
-            q_expectation = beam.polarization_purity * beam.helicity * np.sum(beam.direction * b_hat, axis=-1)
+            epsilon = beam.polarization
+            spin = np.real(1j*np.cross(epsilon, epsilon.conjugate()))
+            q_expectation = beam.polarization_purity * np.sum(spin * b_hat, axis=-1)
             zeeman = -self.effective_magnetic_moment * q_expectation * b_magnitude / hbar
             doppler = np.sum(beam.k_vector * velocity, axis=-1)
             delta = beam.detuning + beam.frequency_offset - doppler + zeeman
-            rates.append(0.5 * self.atom.gamma_rad_s * s / (shared_denominator + (2 * delta / self.atom.gamma_rad_s) ** 2))
+            # Lorentzian laser linewidth adds optical-coherence dephasing. The
+            # configured linewidth is angular FWHM, consistently with detuning.
+            width = self.atom.gamma_rad_s + beam.linewidth
+            rates.append(0.5 * self.atom.gamma_rad_s * s * self.atom.gamma_rad_s/width /
+                         (shared_denominator + (2 * delta / width) ** 2))
         return np.stack(rates, axis=-1)
 
     def per_beam_force(self, position: np.ndarray, velocity: np.ndarray, time: float = 0.0) -> np.ndarray:

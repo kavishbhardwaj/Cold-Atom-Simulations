@@ -64,7 +64,8 @@ class MultilevelRateEquationMOT:
                 # Saturation emerges from the bidirectional stimulated terms
                 # and finite populations in the rate equations. Adding the
                 # effective-model shared denominator here would count it twice.
-                output[bi, ti] = 0.5 * self.atom.gamma_rad_s * effective_s / (1.0 + (2 * delta / self.atom.gamma_rad_s) ** 2)
+                width = self.atom.gamma_rad_s + family.beam.linewidth
+                output[bi, ti] = 0.5 * self.atom.gamma_rad_s * effective_s * self.atom.gamma_rad_s/width / (1.0 + (2 * delta / width) ** 2)
         return output
 
     def generator(self, position: np.ndarray, velocity: np.ndarray, time: float = 0.0) -> np.ndarray:
