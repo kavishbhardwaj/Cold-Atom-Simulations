@@ -148,26 +148,63 @@ density matrix, and spontaneous collapse operators made from the calculated
 branching matrix.  Cooling and repump target labels determine laser frequency;
 they do not filter the allowed excited hyperfine states.
 
-One global excited-manifold optical reference is used.  Every beam then carries
-its own phase
+One global excited-manifold reference and one carrier rotation for each ground
+hyperfine manifold are used. Every beam carries its own residual phase
 
 `k_i . (r0 + v t) - delta_omega_i t + phi_i`,
 
-where `delta_omega_i` contains the selected hyperfine tuning, detuning, and AOM
-offset.  Consequently the trajectory-frame frequency is independently
-`delta_omega_i-k_i.v`.  Equal trajectory-frame frequencies admit a stationary
-rotating-frame sparse null solve.  Unequal frequencies are not folded into an
-effective detuning: the sparse, explicitly time-dependent Liouvillian is
-integrated and its late-time force is averaged.
+where `delta_omega_i` is measured from the carrier for that beam's ground F and
+contains detuning, AOM offset, and `k_i.v`. The 87Rb cooling/repump carrier
+separation is 6.580 GHz for the reference tuning, with a 0.152-ns period (the
+6.835-GHz ground splitting
+partly offset by the excited-state tuning difference). It is removed exactly by
+the two block rotations, so it is **not** a retained numerical beat requiring
+sub-nanosecond stepping. At zero velocity with one frequency per F the largest
+retained beat is zero. At speed `v`, counterpropagating beams retain a largest
+angular beat `2 k v` (2.56 MHz in cycles/s at 1 m/s), which `evolve` resolves
+with adaptive steps; its diagnostics report minimum, median, and maximum
+internal steps, and callers can impose `max_step` and refine tolerances.
 
-The per-beam force is evaluated as `-hbar Tr(rho gradient(H_i/hbar))`.  A spatial
-central derivative includes both the travelling-wave radiation-pressure term
-and Gaussian-envelope dipole force, including stimulated/coherent effects.
+The block transformation makes transverse magnetic matrix elements between F=1
+and F=2 oscillate at the ground hyperfine splitting. Those elements are dropped
+by a secular approximation, while the full vector Zeeman Hamiltonian is retained
+within each F and throughout the excited manifold. The omitted amplitude scales
+as `mu_B B/(hbar Delta_hfs)` (about `2e-5` at 10 microtesla). Likewise each optical
+carrier drives only its selected ground F. `cross_ground_rwa_bound()` reports the
+conservative population-scale bound `(Omega_max/Delta_hfs)^2`; it is below
+`2e-5` for every beam in the reference configuration. Thus “24-state” describes
+the density matrix and complete excited-hyperfine coupling, not an unqualified
+all-frequency/all-ground optical graph.
+
+Beams in one non-null `coherence_group` are summed with their configured relative
+phases. `None` denotes an independent singleton. With multiple groups, force
+evaluation uses deterministic phase cycling: arbitrary absolute phases are
+removed, within-group differences are retained, and observables are averaged
+over group phases. This distinguishes six independent beams, three coherent
+counterpropagating pairs, and one fully coherent six-beam field without treating
+unrelated MOT lasers as one phase-stable field.
+
+The per-beam force is evaluated as `-hbar Tr(rho gradient(H_i/hbar))`. The
+implemented analytic gradient contains `i k_i` from the travelling-wave phase
+and `-2 r_perp/w^2` from the Gaussian field amplitude, including both radiation
+pressure and dipole-force contributions. A configurable central difference is
+retained only as an independent test oracle.
 Spontaneous emission has zero mean recoil in the isotropic approximation and
 therefore adds diffusion but no mean force.
 
 `quick` mode uses 12 lifetimes and 49 output samples for a time-dependent point;
 `research` uses 40 lifetimes and 241 samples with tighter integration tolerance.
+These defaults are numerical starting points, not an assertion of convergence;
+`evolve(..., return_diagnostics=True)` exposes actual adaptive steps and accepts
+both `max_step` and tolerances. Long-lived dark-state configurations require an
+explicit duration/window refinement by the caller.
+
+No unrequested relaxation or eigenvalue clipping is applied. If a stationary
+kernel is degenerate or a row-replaced null solve is nonphysical, the state is
+selected by physical evolution from an initially uniform ground ensemble.
+Optional `ground_relaxation_rate` adds a declared completely-positive isotropic
+ground mixing channel; its default is exactly zero and it must be recorded with
+simulation metadata when used.
 These modes are intended for representative phase-space points and short 1-D
 scans.  A full multi-frequency 24-state three-dimensional grid is deliberately
 not a CI workload; rate equations remain the appropriate weak-coherence grid
