@@ -50,7 +50,9 @@ that constants and equations can be audited.
 13. C. B. Alcock, V. P. Itkin, and M. K. Horrigan, “Vapour pressure equations
 for the metallic elements: 298–2500 K,” *Canadian Metallurgical Quarterly* 23,
 309–313 (1984), <https://doi.org/10.1179/cmq.1984.23.3.309>. Piecewise rubidium
-vapour-pressure fit used by `vacuum.rubidium_vapor_pressure_pa`.
+vapour-pressure fit used by `vacuum.rubidium_vapor_pressure_pa`: pressure is in
+Pa, the solid relation covers 298.15–312.46 K, and the liquid relation is used
+from 312.46–550 K. Extrapolation is rejected unless explicitly requested.
 14. SymPy Development Team, `sympy.physics.wigner` public API documentation,
 <https://docs.sympy.org/latest/modules/physics/wigner.html>. Wigner 6-j and
 Clebsch–Gordan evaluation used to generate all four atomic bases.

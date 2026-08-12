@@ -6,6 +6,7 @@ from cold_atom_mot.io.config import build_vapor_state, load_config, validate_con
 from cold_atom_mot.simulation.capture import (
     CaptureCriterion,
     estimate_stratified_vapor_capture_rate,
+    estimate_adaptive_vapor_capture_rate,
 )
 from cold_atom_mot.vacuum import (
     VaporState,
@@ -14,6 +15,10 @@ from cold_atom_mot.vacuum import (
     one_sided_thermal_flux_m2_s,
     sample_flux_speeds,
     sample_spherical_inward_flux,
+    flux_speed_pdf,
+    gaussian_two_body_effective_volume,
+    steady_state_population,
+    wilson_interval,
 )
 
 
@@ -47,7 +52,7 @@ def test_spherical_flux_is_inward_and_reproducible():
 
 
 def test_stratified_capture_weights_and_loading_rate_are_consistent():
-    vapor = VaporState(300, 1e-7, 2e-7, {"85Rb": 0.0, "87Rb": 1.0})
+    vapor = VaporState(299, 301, 305, 1e-7, 2e-7, {"85Rb": 0.0, "87Rb": 1.0})
     criterion = CaptureCriterion(0.02, 1e6, 2e-5, 5e-6)
     estimate = estimate_stratified_vapor_capture_rate(
         FreeParticle(),
@@ -77,6 +82,9 @@ def test_loading_config_keeps_rb_and_background_pressures_independent():
     direct = build_vapor_state(modified)
     assert direct.rb_partial_pressure_pa == 3e-8
     assert direct.background_gas_pressure_pa == 7e-7
+    assert direct.rb_reservoir_temperature_k == 300
+    assert direct.vapor_temperature_k == 300
+    assert direct.background_temperature_k == 300
 
 
 def test_loading_ode_covers_zero_loss_and_two_body_validation():
@@ -111,3 +119,93 @@ def test_background_collision_loss_requires_explicit_cross_section():
     zero = background_collision_loss_rate_s(1e-7, 300, atom.mass_kg, 4.65e-26, 0.0)
     finite = background_collision_loss_rate_s(1e-7, 300, atom.mass_kg, 4.65e-26, 1e-18)
     assert zero == 0 and finite > 0
+
+
+def test_vapour_pressure_range_and_regression_values():
+    from cold_atom_mot.vacuum import rubidium_vapor_pressure_pa
+    assert rubidium_vapor_pressure_pa(300) == pytest.approx(10**(7.738-4215/300))
+    assert rubidium_vapor_pressure_pa(400) == pytest.approx(10**(7.193-4040/400))
+    with pytest.raises(ValueError, match="298.15"):
+        rubidium_vapor_pressure_pa(280)
+    with pytest.warns(RuntimeWarning):
+        assert rubidium_vapor_pressure_pa(280,allow_extrapolation=True)>0
+
+
+def test_zero_capture_wilson_interval_has_nonzero_upper_bound():
+    low,high=wilson_interval(0,24)
+    assert low == 0 and high > 0
+
+
+def test_loading_arbitrary_initial_population_and_steady_state():
+    t=np.linspace(0,3,20); n0=17.; rate=12.; gamma=.4
+    expected=rate/gamma+(n0-rate/gamma)*np.exp(-gamma*t)
+    np.testing.assert_allclose(loading_curve(t,rate,gamma,initial_population=n0),expected)
+    np.testing.assert_allclose(loading_curve(t,0,gamma,initial_population=n0),n0*np.exp(-gamma*t))
+    steady=steady_state_population(rate,gamma,two_body_coefficient=2e-18,effective_volume_m3=1e-9)
+    coefficient=2e-18/1e-9
+    assert rate-gamma*steady-coefficient*steady**2 == pytest.approx(0,abs=1e-10)
+
+
+def test_gaussian_two_body_effective_volume():
+    sx,sy,sz=1e-3,2e-3,3e-3
+    assert gaussian_two_body_effective_volume(sx,sy,sz)==pytest.approx(8*np.pi**1.5*sx*sy*sz)
+
+
+def test_capture_classification_stable_under_solver_refinement():
+    from cold_atom_mot.simulation.capture import evaluate_capture
+    criterion=CaptureCriterion(.02,1e6,2e-5,5e-6)
+    coarse=evaluate_capture(FreeParticle(),[[-1e-3,0,0]],[[20,0,0]],criterion,
+                            max_step=2e-6,rtol=1e-6,atol=1e-9)[0]
+    fine=evaluate_capture(FreeParticle(),[[-1e-3,0,0]],[[20,0,0]],criterion,
+                          max_step=5e-7,rtol=1e-9,atol=1e-12)[0]
+    np.testing.assert_array_equal(coarse,fine)
+
+
+def test_background_component_additivity_and_double_count_guard():
+    atom=get_atomic_line("87Rb","D2")
+    first=background_collision_loss_rate_s(1e-7,300,atom.mass_kg,4.65e-26,1e-18)
+    second=background_collision_loss_rate_s(2e-7,300,atom.mass_kg,6.64e-27,2e-18)
+    assert first+second > first
+    config=load_config("configs/rb_vapor_loading.yaml",validate=False)
+    config["loading"]["background_collision_model"]={
+        "particle_mass_kg":4.65e-26,"effective_loss_cross_section_m2":1e-18}
+    config["loading"]["background_gas_components"]=[{
+        "species":"N2","partial_pressure_pa":1e-7,"particle_mass_kg":4.65e-26,
+        "effective_loss_cross_section_m2":1e-18}]
+    with pytest.raises(ValueError,match="double count"):
+        validate_config(config)
+    config["loading"]["background_collision_model"] = None
+    with pytest.raises(ValueError, match="must be zero"):
+        validate_config(config)
+
+
+def test_adaptive_tail_reports_nonzero_zero_capture_bound():
+    vapor=VaporState(300,300,300,1e-7,2e-7,{"85Rb":0.,"87Rb":1.})
+    impossible=CaptureCriterion(1e-9,1e-9,2e-5,5e-6)
+    estimate=estimate_adaptive_vapor_capture_rate(
+        FreeParticle(),vapor,impossible,capture_surface_radius_m=.001,
+        initial_speed_edges_m_s=[0,20],atoms_per_bin=4,maximum_speed_m_s=40,
+        tail_relative_loading_tolerance=1e-3,max_step_s=1e-6,seed=4)
+    assert estimate.capture_probability == 0
+    assert estimate.omitted_capture_probability_upper > 0
+    assert not estimate.tail_converged
+
+
+def test_adaptive_tail_can_meet_statistical_stopping_rule():
+    vapor=VaporState(300,300,300,1e-7,2e-7,{"85Rb":0.,"87Rb":1.})
+    criterion=CaptureCriterion(.02,25.,2e-5,5e-6)
+    estimate=estimate_adaptive_vapor_capture_rate(
+        FreeParticle(),vapor,criterion,capture_surface_radius_m=.001,
+        initial_speed_edges_m_s=[0,20,40],atoms_per_bin=4,maximum_speed_m_s=1600,
+        tail_relative_loading_tolerance=1e-3,max_step_s=2e-6,seed=5)
+    assert estimate.capture_probability > 0
+    assert estimate.tail_converged
+    assert estimate.last_simulated_speed_m_s <= 1600
+
+
+def test_temperature_dependent_flux_weighting_changes_capture_integral():
+    speed=np.linspace(0,80,2000); response=(speed<20).astype(float)
+    atom=get_atomic_line("87Rb","D2")
+    cold=np.trapezoid(response*flux_speed_pdf(speed,280,atom.mass_kg),speed)
+    hot=np.trapezoid(response*flux_speed_pdf(speed,350,atom.mass_kg),speed)
+    assert cold > hot > 0

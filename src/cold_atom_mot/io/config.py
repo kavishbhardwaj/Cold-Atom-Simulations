@@ -27,8 +27,10 @@ def validate_config(config: dict) -> None:
             if section not in config:
                 raise ValueError(f"vapor-loading configuration requires {section}")
         vacuum, capture, loading = config["vacuum"], config["capture"], config["loading"]
-        if vacuum["cell_temperature_k"] <= 0 or vacuum["background_gas_pressure_pa"] < 0:
-            raise ValueError("vacuum temperature must be positive and background pressure non-negative")
+        temperatures=(vacuum["rb_reservoir_temperature_k"],vacuum["vapor_temperature_k"],
+                      vacuum["background_temperature_k"])
+        if min(temperatures) <= 0 or vacuum["background_gas_pressure_pa"] < 0:
+            raise ValueError("all temperatures must be positive and background pressure non-negative")
         if vacuum.get("rb_partial_pressure_pa") is not None and vacuum["rb_partial_pressure_pa"] < 0:
             raise ValueError("Rb partial pressure must be non-negative")
         if not np.isclose(sum(vacuum["isotope_fractions"].values()), 1.0):
@@ -40,13 +42,27 @@ def validate_config(config: dict) -> None:
             raise ValueError("capture surface, sampling, step, and speed edges must be physical")
         if min(criterion.values()) <= 0:
             raise ValueError("capture criterion values must be positive")
+        if (not 0 < capture["tail_relative_loading_tolerance"] < 1 or
+                capture["maximum_speed_m_s"] <= edges[-1]):
+            raise ValueError("tail tolerance must be in (0,1) and maximum speed above initial edges")
         if min(loading["background_one_body_loss_s"], loading["hot_rb_one_body_loss_s"],
                loading["two_body_loss_m3_s"]) < 0:
             raise ValueError("loss coefficients must be non-negative")
         collision = loading.get("background_collision_model")
+        components = loading.get("background_gas_components")
+        if collision is not None and components:
+            raise ValueError("background collision model and component list would double count")
+        if (collision is not None or components) and loading["background_one_body_loss_s"] > 0:
+            raise ValueError(
+                "background_one_body_loss_s must be zero when kinetic background-gas inputs are present"
+            )
         if collision is not None and min(collision["particle_mass_kg"],
                                          collision["effective_loss_cross_section_m2"]) <= 0:
             raise ValueError("kinetic background collision inputs must be positive")
+        for component in components or []:
+            if min(component["partial_pressure_pa"],component["particle_mass_kg"],
+                   component["effective_loss_cross_section_m2"]) <= 0:
+                raise ValueError("background component inputs must be positive")
         return
     if config.get("model") == "polarization_gradient":
         for section in ("atom", "laser", "magnetic_field", "simulation", "output"):
@@ -156,12 +172,17 @@ def build_subdoppler_model(config: dict) -> PolarizationGradientModel:
 def build_vapor_state(config: dict) -> VaporState:
     """Build thermodynamic Rb state without conflating background pressure."""
     vacuum = config["vacuum"]
-    temperature = vacuum["cell_temperature_k"]
+    reservoir_temperature = vacuum["rb_reservoir_temperature_k"]
     rb_pressure = vacuum.get("rb_partial_pressure_pa")
     if rb_pressure is None:
-        rb_pressure = rubidium_vapor_pressure_pa(temperature)
+        rb_pressure = rubidium_vapor_pressure_pa(
+            reservoir_temperature,
+            allow_extrapolation=vacuum.get("allow_vapor_pressure_extrapolation", False),
+        )
     return VaporState(
-        temperature,
+        reservoir_temperature,
+        vacuum["vapor_temperature_k"],
+        vacuum["background_temperature_k"],
         rb_pressure,
         vacuum["background_gas_pressure_pa"],
         vacuum["isotope_fractions"],

@@ -94,14 +94,25 @@ effective 87Rb D2 force and `configs/rb_vapor_loading.yaml`.
 
 [Convergence SVG](capture_loading/capture_sampling_convergence.svg)
 
+![Speed/impact-parameter capture response](capture_loading/capture_response_map.png)
+
+[Response-map SVG](capture_loading/capture_response_map.svg)
+
 [Numerical data and metadata](capture_loading/capture_loading_reference.npz).
 The incident ensemble uses the surface-flux speed law and cosine angular law,
-with stratification to resolve the rare slow tail. The capture sphere is an
-acceptance boundary rather than a chamber model. Speeds above 80 m/s are assigned
-zero capture after the simulated 20–80 m/s bins show the cutoff; the omitted
-high-speed flux probability remains stored. Background and hot-Rb loss rates are
+with stratification and Wilson intervals to resolve the rare slow tail. The
+temperature-independent `P_capture(v,b)` response is integrated against each
+temperature's flux distribution. Adaptive geometric tail strata report the
+last speed and an upper confidence bound rather than declaring zero capture.
+The capture sphere is an acceptance boundary rather than a chamber model.
+Background and hot-Rb loss rates are
 independent calibrated inputs. The plotted atom numbers are scenarios, not an
 experimentally validated population prediction.
+
+| Effective versus multilevel trajectories | Loading versus beam waist |
+|---|---|
+| ![Model comparison](capture_loading/effective_multilevel_capture_comparison.png) | ![Waist loading](capture_loading/loading_vs_beam_waist.png) |
+| [SVG](capture_loading/effective_multilevel_capture_comparison.svg) | [SVG](capture_loading/loading_vs_beam_waist.svg) |
 
 ## Cold-atom foundations
 

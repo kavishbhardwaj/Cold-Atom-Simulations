@@ -95,6 +95,12 @@ OBE retaining ground coherences is the next external-validation gate.
 - the one-sided flux equals `n<v>/4`;
 - zero-loss and one-body loading equations reproduce their analytical limits;
 - two-body loss is rejected without a positive effective volume.
+- zero-capture strata retain a nonzero Wilson upper bound;
+- capture classification is stable under RK45 step/tolerance refinement;
+- arbitrary initial populations reproduce analytical one-body solutions;
+- nonlinear steady state satisfies the positive-root balance equation;
+- Gaussian-cloud effective volume matches the analytical density integral;
+- background component losses add and aggregate/component double counting is rejected.
 
 These tests validate sampling and bookkeeping, not collision cross sections or
 an experimental loading rate. The acceptance surface and effective loss inputs

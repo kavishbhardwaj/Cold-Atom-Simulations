@@ -90,8 +90,11 @@ are stored in YAML and NPZ metadata.
 ## Vapour loading and loss
 
 Rubidium partial pressure is either supplied directly or obtained from the cited
-Alcock fit; ideal-gas density is `P_Rb/(k_B T)`. This is distinct from non-Rb
-background pressure. The loading integrator accepts, but never invents, a
+Alcock fit at the **reservoir/cold-spot temperature**. The vapour kinetic
+temperature separately sets `P_Rb/(k_B T_vapour)` and incident velocities; the
+background temperature sets background density and relative collision speed.
+These can differ when a reservoir/cold spot, cell body, and vacuum environment
+are not isothermal. This is distinct from non-Rb background pressure. The loading integrator accepts, but never invents, a
 trajectory/geometry-derived loading rate, a calibrated one-body loss rate, and
 an optional phenomenological two-body coefficient/effective volume. No committed
 curve is presented as a calibrated atom-number prediction.
@@ -102,8 +105,10 @@ one-sided equilibrium flux. The total flux per unit area is
 `v^3 exp[-m v^2/(2 k_B T)]`, not the bulk Maxwell `v^2` law. Incidence angles
 follow the cosine law. Configurable speed strata resolve the extremely rare
 slow tail without pretending a small unstratified sample can measure it. Each
-stratum carries its exact flux-CDF probability, and the result stores the
-unmodelled probability above the final speed edge.
+stratum carries its exact flux-CDF probability. Geometric tail strata extend to
+a configured maximum; a Wilson 95% upper bound from the terminal zero-capture
+stratum bounds—not declares zero—the unresolved loading contribution. The result
+stores the last speed, omitted flux, upper bound, and whether tolerance was met.
 
 The capture criterion requires an atom to remain inside the specified radius
 and below the speed threshold for the configured dwell time. Multiplying its
@@ -112,3 +117,13 @@ ODE then uses independently configured one-body background/hot-Rb losses and an
 optional phenomenological two-body coefficient. A kinetic background-loss mode
 is available only when the user supplies gas mass and an effective ejection
 cross section.
+
+The temperature scan integrates a temperature-independent numerical response
+`P_capture(v,b)` against the surface-flux distribution at each vapour
+temperature. It therefore changes density, mean flux, and within-bin thermal
+weight consistently rather than reusing conditional samples drawn at one T.
+
+For a Gaussian cloud with rms widths `(sigma_x,sigma_y,sigma_z)`,
+`integral(n²dV)=N²/[8 pi^(3/2) sigma_x sigma_y sigma_z]`; the corresponding
+two-body effective volume may replace the explicit volume. Widths are inputs,
+not inferred from the approximate polarization-gradient temperature.

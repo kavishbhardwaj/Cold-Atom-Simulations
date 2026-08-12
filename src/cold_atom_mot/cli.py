@@ -10,8 +10,9 @@ from .solvers.deterministic import integrate_trajectory
 from .solvers.monte_carlo import simulate_photon_events
 from .atomic.species import get_atomic_line
 from .physics.optical_bloch import TwoLevelOBE
-from .simulation.capture import CaptureCriterion, estimate_stratified_vapor_capture_rate
-from .vacuum import background_collision_loss_rate_s, loading_curve
+from .simulation.capture import CaptureCriterion, estimate_adaptive_vapor_capture_rate
+from .vacuum import (background_collision_loss_rate_s,
+                     gaussian_two_body_effective_volume, loading_curve)
 
 
 def simulate(config_path: str) -> None:
@@ -117,35 +118,53 @@ def vapor_loading(config_path: str) -> None:
     vapor = build_vapor_state(config)
     capture = config["capture"]
     criterion = CaptureCriterion(**capture["criterion"])
-    estimate = estimate_stratified_vapor_capture_rate(
+    estimate = estimate_adaptive_vapor_capture_rate(
         force_model,
         vapor,
         criterion,
         capture_surface_radius_m=capture["surface_radius_m"],
-        speed_bin_edges_m_s=capture["speed_bin_edges_m_s"],
+        initial_speed_edges_m_s=capture["speed_bin_edges_m_s"],
         atoms_per_bin=capture["atoms_per_bin"],
+        maximum_speed_m_s=capture["maximum_speed_m_s"],
+        tail_relative_loading_tolerance=capture["tail_relative_loading_tolerance"],
         max_step_s=capture["max_step_s"],
         seed=capture["seed"],
+        confidence_level=capture["confidence_level"],
+        rtol=capture["rtol"],atol=capture["atol"],
     )
     loss = config["loading"]
     background_loss = loss["background_one_body_loss_s"]
     collision = loss.get("background_collision_model")
+    components = loss.get("background_gas_components")
+    if collision is not None and components:
+        raise ValueError("choose aggregate background collision model or components, not both")
     if collision is not None:
         background_loss = background_collision_loss_rate_s(
             vapor.background_gas_pressure_pa,
-            vapor.temperature_k,
+            vapor.background_temperature_k,
             force_model.atom.mass_kg,
             collision["particle_mass_kg"],
             collision["effective_loss_cross_section_m2"],
         )
+    elif components:
+        background_loss=0.0
+        for component in components:
+            background_loss += background_collision_loss_rate_s(
+                component["partial_pressure_pa"],vapor.background_temperature_k,
+                force_model.atom.mass_kg,component["particle_mass_kg"],
+                component["effective_loss_cross_section_m2"],
+            )
     one_body_loss = background_loss + loss["hot_rb_one_body_loss_s"]
     time = np.linspace(0, loss["curve_duration_s"], loss["curve_points"])
+    effective_volume=loss["effective_volume_m3"]
+    if loss.get("gaussian_cloud_sigma_m") is not None:
+        effective_volume=gaussian_two_body_effective_volume(**loss["gaussian_cloud_sigma_m"])
     atom_number = loading_curve(
         time,
         estimate.loading_rate_s,
         one_body_loss,
         two_body_coefficient=loss["two_body_loss_m3_s"],
-        effective_volume_m3=loss["effective_volume_m3"],
+        effective_volume_m3=effective_volume,
     )
     metadata = {
         "simulation_version": __version__,
@@ -168,6 +187,12 @@ def vapor_loading(config_path: str) -> None:
         incident_flux_s=estimate.incident_flux_s,
         loading_rate_s=estimate.loading_rate_s,
         omitted_high_speed_probability=estimate.omitted_high_speed_probability,
+        capture_probability_confidence_interval=estimate.confidence_interval,
+        loading_rate_confidence_interval_s=estimate.loading_rate_confidence_interval_s,
+        last_simulated_speed_m_s=estimate.last_simulated_speed_m_s,
+        omitted_capture_probability_upper=estimate.omitted_capture_probability_upper,
+        omitted_loading_rate_upper_s=estimate.omitted_loading_rate_upper_s,
+        tail_converged=estimate.tail_converged,
         time_s=time,
         atom_number=atom_number,
         rb_partial_pressure_pa=vapor.rb_partial_pressure_pa,
