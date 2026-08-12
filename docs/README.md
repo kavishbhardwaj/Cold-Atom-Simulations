@@ -4,29 +4,32 @@ Use this page as a short guide to the repository. The code is organized as a hie
 
 ## Start here
 
-- **[Full tutorial: From Rubidium Atoms to a MOT Simulation](tutorial/README.md)** — the recommended first read. It derives the equations, explains why each model was chosen, states every major approximation, interprets the calculation results, and gives a clean-checkout reproduction workflow.
+- **[Continuous equation-to-result tutorial](tutorial/continuous_walkthrough.md)** — the recommended first read. It defines symbols before use and follows the actual scientific workflow: question → equation → modelling/tool decision → approximation → result/plot → interpretation → next model.
+- **[Notation and governing-equation inventory](tutorial/00_notation_and_equation_inventory.md)** — glossary and completeness audit of the core physical equations that determine repository results.
+- **[Equation visual atlas](tutorial/equation_visual_atlas.md)** — pedagogical equation plots plus the corresponding generated simulation results.
+- [Tutorial index and deeper reference chapters](tutorial/README.md) — chaptered extensions of the main walkthrough.
 - [Model hierarchy](model_hierarchy.md) — which solver to use, and what each one neglects.
 - [Validation](validation.md) — what is independently verified, internally tested, or not yet validated.
 - [Scientific results](../results/README.md) — figures, numerical data, provenance, and fidelity notes.
 
-The tutorial is intentionally **not** an expanded README. It is a chaptered technical narrative that follows the calculation from atomic constants through laser/magnetic apparatus, force models, OBEs, PGC, trajectories, vapour loading, experimental timing, collective effects, validation and reproducibility.
+The tutorial is intentionally **not** an expanded README. The primary walkthrough follows the calculation continuously from atomic constants through hyperfine structure, laser/magnetic apparatus, MOT force, rate equations, Lindblad/OBE physics, PGC, trajectories, vapour loading, experimental timing, collective effects and validation.
 
 ## Atomic and cooling physics
 
 - [Atomic systems](atomic_systems.md) — 85Rb/87Rb, D1/D2, hyperfine structure and supported transitions.
-- [Cooling physics](cooling_physics.md) — Doppler force, optical pumping, recoil and polarization-gradient cooling.
-- [Numerical methods](numerical_methods.md) — integration, convergence, sampling and solver choices.
+- [Cooling physics](cooling_physics.md) — Doppler force, optical pumping, recoil, and polarization-gradient cooling.
+- [Numerical methods](numerical_methods.md) — integration, convergence, sampling, and solver choices.
 
 ## Laboratory apparatus
 
-- [Six-beam apparatus](six_beam_apparatus.md) — six physical beams, Gaussian propagation, Jones optics, QWP errors, retroreflection and coherence groups.
-- [Magnetic apparatus](magnetic_apparatus.md) — MOT/bias coils, calibration matrices, stray fields, 50/60-Hz components, switch-off and eddy currents.
-- [Experimental sequences](experimental_sequences.md) — time-dependent MOT load, compression, field settling, PGC/molasses and TOF stages.
+- [Six-beam apparatus](six_beam_apparatus.md) — six physical beams, Gaussian propagation, Jones optics, QWP errors, retroreflection, and coherence groups.
+- [Magnetic apparatus](magnetic_apparatus.md) — MOT/bias coils, calibration matrices, stray fields, 50/60-Hz components, switch-off, and eddy currents.
+- [Experimental sequences](experimental_sequences.md) — time-dependent MOT load, compression, field settling, PGC/molasses, and TOF stages.
 
 ## Loading and many-atom extensions
 
-- [Collective MOT physics](collective_mot.md) — optional Gaussian density, two-body loss, shadowing, multiple scattering and radiation-trapping proxy.
-- Vapour/capture/loading details are derived in [Tutorial Part III](tutorial/03_motion_loading_and_collective_physics.md) and documented through the model hierarchy, configuration files, and the [capture/loading results](../results/README.md#vapour-capture-loading-and-loss).
+- [Collective MOT physics](collective_mot.md) — optional Gaussian density, two-body loss, shadowing, multiple scattering, and radiation-trapping proxy.
+- Vapour/capture/loading physics is derived continuously in the [main tutorial](tutorial/continuous_walkthrough.md) and documented further through the model hierarchy, configuration files, and the [capture/loading results](../results/README.md#vapour-capture-loading-and-loss).
 
 ## How to interpret claims
 
