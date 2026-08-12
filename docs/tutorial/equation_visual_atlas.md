@@ -1,6 +1,14 @@
 # Equation visual atlas
 
-This page is a visual companion to the tutorial. The small SVG figures below are **pedagogical plots generated directly from the stated equations**; they are not experimental measurements. Repository simulation results are shown separately and are linked beside the relevant equation.
+This page is the visual companion to the main tutorial. The small SVG figures below are **pedagogical plots of the stated equations**, not experimental measurements. The adjacent repository figures are actual generated simulation/validation results.
+
+The pedagogical plots are reproducible from the repository root with:
+
+```bash
+python examples/generate_tutorial_equation_figures.py
+```
+
+That script evaluates the analytical equations or the repository's low-level validated solvers and rewrites the SVG files under `docs/tutorial/figures/`. The visual distinction is deliberate: an **equation plot** teaches the shape implied by a formula; a **repository result** shows what the configured simulation actually produced.
 
 ## Atomic structure
 
@@ -122,4 +130,4 @@ Repository loading/loss scenario:
 
 ![Collective MOT](../../results/collective_mot/collective_mot_diagnostics.png)
 
-The visual atlas is intentionally paired with the [notation/equation inventory](00_notation_and_equation_inventory.md): the atlas shows what the equations do, while the inventory defines every symbol and records the exact equation used by each solver.
+The visual atlas is intentionally paired with the [notation/equation inventory](00_notation_and_equation_inventory.md): the atlas shows what the equations do, while the inventory defines the symbols and records the governing equations used by the solvers.
