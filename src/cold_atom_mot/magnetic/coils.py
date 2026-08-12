@@ -90,3 +90,77 @@ class AntiHelmholtzPair:
     @property
     def is_time_independent(self) -> bool:
         return self.first.is_time_independent and self.second.is_time_independent
+
+
+@dataclass(frozen=True)
+class HelmholtzPair:
+    """Two approximately co-directed circular bias coils with independent geometry."""
+    first: CircularCoil
+    second: CircularCoil
+
+    @classmethod
+    def imperfect(cls, axis, radius, separation, current, turns, *, segments=256,
+                   separation_error=0.0, radius_mismatch=0.0,
+                   current_imbalance=0.0, turns_mismatch=0,
+                   lateral_displacement=(0, 0, 0), tilt=(0, 0, 0)):
+        axis = unit(axis); separation += separation_error
+        lateral = np.asarray(lateral_displacement, float)
+        tilt = np.asarray(tilt, float)
+        second_axis = unit(axis+tilt)
+        return cls(
+            CircularCoil(-axis*separation/2, axis, radius*(1-radius_mismatch/2),
+                         current*(1-current_imbalance/2), turns, segments),
+            CircularCoil(axis*separation/2+lateral, second_axis,
+                         radius*(1+radius_mismatch/2), current*(1+current_imbalance/2),
+                         turns+turns_mismatch, segments))
+
+    def field(self, positions, time=0.0):
+        return self.first.field(positions, time)+self.second.field(positions, time)
+
+    def jacobian(self, position=np.zeros(3), step=1e-5):
+        point=np.asarray(position,float); output=np.empty((3,3))
+        for axis in range(3):
+            shift=np.zeros(3);shift[axis]=step
+            output[:,axis]=(self.field(point+shift)-self.field(point-shift))/(2*step)
+        return output
+
+    def curvature(self, position=np.zeros(3), step=1e-4):
+        """Return d2 B_i / dx_j dx_k as a 3x3x3 tensor."""
+        point=np.asarray(position,float); output=np.empty((3,3,3))
+        for axis in range(3):
+            shift=np.zeros(3);shift[axis]=step
+            output[:,:,axis]=(self.jacobian(point+shift,step/5)-self.jacobian(point-shift,step/5))/(2*step)
+        return output
+
+    @property
+    def is_time_independent(self): return True
+
+
+@dataclass(frozen=True)
+class ThreeAxisBiasCoils:
+    """Physical x/y/z pairs plus an empirical B=M I+B_offset calibration."""
+    pairs: tuple
+    calibration_matrix: np.ndarray
+    offset: np.ndarray
+
+    def __post_init__(self):
+        if len(self.pairs)!=3: raise ValueError("three bias-coil pairs are required")
+        matrix=np.asarray(self.calibration_matrix,float); offset=np.asarray(self.offset,float)
+        if matrix.shape!=(3,3) or offset.shape!=(3,): raise ValueError("calibration must be 3x3 with a three-vector offset")
+        object.__setattr__(self,"calibration_matrix",matrix);object.__setattr__(self,"offset",offset)
+
+    def compensation_currents(self, background, target=np.zeros(3)):
+        """Least-squares currents minimizing M I+B_offset+B_background-target."""
+        return np.linalg.lstsq(self.calibration_matrix,
+            np.asarray(target)-self.offset-np.asarray(background),rcond=None)[0]
+
+    def calibrated_field(self, currents, background=np.zeros(3)):
+        return self.calibration_matrix@np.asarray(currents)+self.offset+np.asarray(background)
+
+    def physical_field(self, positions, currents):
+        currents=np.asarray(currents,float)
+        total=np.zeros_like(np.asarray(positions,float))
+        for pair,current in zip(self.pairs,currents):
+            reference=pair.first.current
+            total += pair.field(positions)*current/reference
+        return total

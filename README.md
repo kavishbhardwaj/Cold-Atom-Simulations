@@ -42,6 +42,7 @@ Detailed equations and boundaries: [model hierarchy](docs/model_hierarchy.md),
 and [validation](docs/validation.md).
 Time-dependent laboratory controls are described in [experimental sequences](docs/experimental_sequences.md).
 Independent physical beams and Jones optics are described in [six-beam apparatus](docs/six_beam_apparatus.md).
+Bias compensation, coil imperfections, and switching fields are described in [magnetic apparatus](docs/magnetic_apparatus.md).
 
 ## Selected results
 

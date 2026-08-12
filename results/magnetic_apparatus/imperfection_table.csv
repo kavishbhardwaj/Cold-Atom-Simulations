@@ -1,0 +1,7 @@
+imperfection,configured_magnitude,Bx_T,By_T,Bz_T,mot_dx_m,mot_dy_m,mot_dz_m,OBE_coherence_relative_change,PGC_temperature
+ideal,0,0.0,0.0,0.0,-0.0,-0.0,0.0,0.0,not calculated: no matched OBE diffusion
+1% current imbalance,0.01,8.881784195828306e-23,-1.0963452366725554e-23,0.0,-8.881784195828306e-22,1.0963452366725554e-22,0.0,-1.1102230246251565e-16,not calculated: no matched OBE diffusion
+1 mm lateral displacement,0.001,3.3763080578665715e-06,-7.67441665670812e-21,-7.869418555380217e-11,-3.376308057866571e-05,7.67441665670812e-20,-3.9347092776901085e-10,8.215994282356753e-05,not calculated: no matched OBE diffusion
+1 degree tilt,1,2.7467405179523444e-06,1.1494277750304701e-20,6.8616080484032275e-09,-2.7467405179523444e-05,-1.14942777503047e-19,3.430804024201614e-08,6.696620467772085e-05,not calculated: no matched OBE diffusion
+10 mG background,10,0.0,0.0,1e-06,-0.0,-0.0,4.9999999999999996e-06,-1.0352521218059962e-06,not calculated: no matched OBE diffusion
+50 Hz snapshot amplitude,10,1e-06,0.0,0.0,-9.999999999999999e-06,-0.0,0.0,2.4522867239529234e-05,not calculated: no matched OBE diffusion

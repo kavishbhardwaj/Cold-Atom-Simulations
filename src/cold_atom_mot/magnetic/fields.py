@@ -72,3 +72,51 @@ class CompositeField:
     def is_time_independent(self) -> bool:
         return all(getattr(component, "is_time_independent", False)
                    for component in self.components)
+
+
+@dataclass(frozen=True)
+class HarmonicResidualField:
+    """Uniform/gradient background plus configurable AC harmonics."""
+    uniform: np.ndarray
+    gradient: np.ndarray = field(default_factory=lambda: np.zeros((3,3)))
+    # tuples (vector amplitude [T], frequency [Hz], phase [rad])
+    harmonics: tuple = ()
+
+    def field(self, positions, time=0.0):
+        result=np.asarray(positions,float)@np.asarray(self.gradient,float).T+np.asarray(self.uniform,float)
+        for amplitude,frequency,phase in self.harmonics:
+            result=result+np.asarray(amplitude,float)*np.sin(2*np.pi*frequency*time+phase)
+        return result
+
+    @property
+    def is_time_independent(self): return len(self.harmonics)==0
+
+
+@dataclass(frozen=True)
+class SwitchingTransientField:
+    """L/R current and multiple eddy exponentials, or a measured waveform."""
+    switch_time: float
+    dc_field: np.ndarray
+    coil_amplitude: np.ndarray
+    coil_time_constant: float
+    eddy_components: tuple = ()  # (amplitude vector, tau)
+    waveform_time: np.ndarray | None = None
+    waveform_field: np.ndarray | None = None
+
+    def __post_init__(self):
+        if self.coil_time_constant<=0 or any(tau<=0 for _,tau in self.eddy_components):
+            raise ValueError("transient time constants must be positive")
+        if (self.waveform_time is None)!=(self.waveform_field is None):
+            raise ValueError("waveform time and field must be supplied together")
+
+    def field(self, positions, time=0.0):
+        del positions
+        elapsed=max(0,time-self.switch_time); result=np.asarray(self.dc_field,float)
+        if self.waveform_time is not None:
+            return result+np.array([np.interp(elapsed,self.waveform_time,np.asarray(self.waveform_field)[:,i]) for i in range(3)])
+        result=result+np.asarray(self.coil_amplitude)*np.exp(-elapsed/self.coil_time_constant)
+        for amplitude,tau in self.eddy_components: result=result+np.asarray(amplitude)*np.exp(-elapsed/tau)
+        return result
+
+    @property
+    def is_time_independent(self): return False
