@@ -4,9 +4,12 @@ Use this page as a short guide to the repository. The code is organized as a hie
 
 ## Start here
 
+- **[Full tutorial: From Rubidium Atoms to a MOT Simulation](tutorial/README.md)** — the recommended first read. It derives the equations, explains why each model was chosen, states every major approximation, interprets the calculation results, and gives a clean-checkout reproduction workflow.
 - [Model hierarchy](model_hierarchy.md) — which solver to use, and what each one neglects.
 - [Validation](validation.md) — what is independently verified, internally tested, or not yet validated.
 - [Scientific results](../results/README.md) — figures, numerical data, provenance, and fidelity notes.
+
+The tutorial is intentionally **not** an expanded README. It is a chaptered technical narrative that follows the calculation from atomic constants through laser/magnetic apparatus, force models, OBEs, PGC, trajectories, vapour loading, experimental timing, collective effects, validation and reproducibility.
 
 ## Atomic and cooling physics
 
@@ -23,7 +26,7 @@ Use this page as a short guide to the repository. The code is organized as a hie
 ## Loading and many-atom extensions
 
 - [Collective MOT physics](collective_mot.md) — optional Gaussian density, two-body loss, shadowing, multiple scattering and radiation-trapping proxy.
-- Vapour/capture/loading details are also documented through the model hierarchy, validation notes, configuration files, and the [capture/loading results](../results/README.md#vapour-capture-loading-and-loss).
+- Vapour/capture/loading details are derived in [Tutorial Part III](tutorial/03_motion_loading_and_collective_physics.md) and documented through the model hierarchy, configuration files, and the [capture/loading results](../results/README.md#vapour-capture-loading-and-loss).
 
 ## How to interpret claims
 
