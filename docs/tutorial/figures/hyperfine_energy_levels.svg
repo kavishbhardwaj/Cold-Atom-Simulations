@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="440"><rect width="100%" height="100%" fill="white"/>
+<text x="360" y="28" text-anchor="middle" font-family="sans-serif" font-size="18">87Rb D2 hyperfine energies from A_hfs and B_hfs</text>
+<text x="360" y="52" text-anchor="middle" font-family="sans-serif" font-size="12">Offsets relative to the highest-F level in each fine-structure manifold</text>
+<line x1="90" y1="300" x2="270" y2="300" stroke="#1f77b4" stroke-width="3"/>
+<text x="280" y="305" font-family="sans-serif" font-size="13">F=1: -6.834683 GHz</text>
+<line x1="90" y1="150" x2="270" y2="150" stroke="#1f77b4" stroke-width="3"/>
+<text x="280" y="155" font-family="sans-serif" font-size="13">F=2: 0</text>
+<line x1="430" y1="350" x2="610" y2="350" stroke="#d62728" stroke-width="3"/>
+<text x="620" y="355" font-family="sans-serif" font-size="13">F'=0: -495.815 MHz</text>
+<line x1="430" y1="300" x2="610" y2="300" stroke="#d62728" stroke-width="3"/>
+<text x="620" y="305" font-family="sans-serif" font-size="13">F'=1: -423.593 MHz</text>
+<line x1="430" y1="225" x2="610" y2="225" stroke="#d62728" stroke-width="3"/>
+<text x="620" y="230" font-family="sans-serif" font-size="13">F'=2: -266.652 MHz</text>
+<line x1="430" y1="110" x2="610" y2="110" stroke="#d62728" stroke-width="3"/>
+<text x="620" y="115" font-family="sans-serif" font-size="13">F'=3: 0</text>
+<text x="180" y="405" text-anchor="middle" font-family="sans-serif" font-size="14">5S1/2 ground manifold</text>
+<text x="520" y="405" text-anchor="middle" font-family="sans-serif" font-size="14">5P3/2 excited manifold</text>
+</svg>
