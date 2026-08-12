@@ -1,13 +1,10 @@
 """Sparse multilevel optical-Bloch operators for a generated atomic basis."""
 from dataclasses import dataclass
 import numpy as np
-from scipy.constants import hbar, physical_constants
 from scipy.sparse import csr_matrix, eye, kron
 from scipy.sparse.linalg import spsolve
 from ..laser.polarization import spherical_fractions
-
-MU_B=physical_constants["Bohr magneton"][0]
-
+from ..atomic.zeeman import hyperfine_zeeman_hamiltonian
 
 @dataclass
 class MultilevelOBE:
@@ -23,7 +20,9 @@ class MultilevelOBE:
 
     def hamiltonian(self, position, velocity=(0,0,0), time=0.0):
         n=len(self.basis.ground)+len(self.basis.excited); ng=len(self.basis.ground)
-        h=np.zeros((n,n),complex); b=np.asarray(self.magnetic_field.field(position,time)); bmag=np.linalg.norm(b)
+        h=np.zeros((n,n),complex); b=np.asarray(self.magnetic_field.field(position,time))
+        ground_exact = hyperfine_zeeman_hamiltonian(self.basis.line, "ground", b)
+        excited_exact = hyperfine_zeeman_hamiltonian(self.basis.line, "excited", b)
         rotating_ground={}
         for family in self.beam_families:
             target=next(e.frequency_offset_hz for e in self.basis.excited if e.F==family.target_excited_f)
@@ -31,12 +30,18 @@ class MultilevelOBE:
             previous=rotating_ground.setdefault(family.ground_f,value)
             if not np.isclose(previous,value):
                 raise ValueError("multilevel OBE requires one optical frequency per ground manifold")
+        h[:ng,:ng] = ground_exact
+        h[ng:,ng:] = excited_exact
         for i,state in enumerate(self.basis.ground):
             rotating=rotating_ground.get(state.F,2*np.pi*state.frequency_offset_hz)
-            h[i,i]=rotating+MU_B/hbar*state.g_factor*state.m*bmag
-        for i,state in enumerate(self.basis.excited): h[ng+i,ng+i]=2*np.pi*state.frequency_offset_hz+MU_B/hbar*state.g_factor*state.m*bmag
+            h[i,i] += rotating - 2*np.pi*self.basis.line.hyperfine_energy_hz("ground", state.F)
+        excited_reference = self.basis.line.hyperfine_energy_hz("excited", max(self.basis.line.excited_f))
+        h[ng:,ng:] -= 2*np.pi*excited_reference*np.eye(len(self.basis.excited))
         for family in self.beam_families:
-            axis=b/bmag if bmag>1e-12 else np.array([0.,0.,1.]); fractions=spherical_fractions(family.beam.polarization,axis)
+            # Optical q labels retain the fixed laboratory coupled basis.  The
+            # full vector Hamiltonian, rather than a rotating local axis, mixes
+            # mF states for transverse fields continuously through B=0.
+            fractions=spherical_fractions(family.beam.polarization,np.array([0.,0.,1.]))
             s=float(family.beam.intensity(position)/self.basis.line.saturation_intensity_w_m2)
             for transition in self.basis.transitions:
                 g=self.basis.ground[transition.ground_index]; e=self.basis.excited[transition.excited_index]

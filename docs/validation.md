@@ -105,3 +105,12 @@ OBE retaining ground coherences is the next external-validation gate.
 These tests validate sampling and bookkeeping, not collision cross sections or
 an experimental loading rate. The acceptance surface and effective loss inputs
 must be matched to an apparatus before quantitative comparison.
+
+## Vector hyperfine–Zeeman checks
+
+- exact zero-field Hamiltonians reproduce tabulated hyperfine energies;
+- weak-field slopes recover generated Landé `g_F` factors;
+- equal-magnitude x, y, z, and tilted fields have identical spectra;
+- the vector Hamiltonian is Hermitian and continuous through `B=0`;
+- larger fields resolve a nonlinear departure from `g_F m_F mu_B B`;
+- the transverse-field multilevel Liouvillian remains trace preserving.

@@ -127,3 +127,14 @@ For a Gaussian cloud with rms widths `(sigma_x,sigma_y,sigma_z)`,
 `integral(n²dV)=N²/[8 pi^(3/2) sigma_x sigma_y sigma_z]`; the corresponding
 two-body effective volume may replace the explicit volume. Widths are inputs,
 not inferred from the approximate polarization-gradient temperature.
+
+## Vector magnetic Hamiltonian in coherent models
+
+The sparse multilevel OBE constructs hyperfine and vector-Zeeman blocks in a
+stable uncoupled `|m_I,m_J>` basis and transforms them to the coupled basis used
+by the dipole graph. It evaluates the complete `B(r,t)` from the configured
+quadrupole, residual, composite, or coil field. Transverse magnetic mixing is
+retained and the Hamiltonian remains continuous at field zero. The effective
+force, rate equations, and population-only polarization-gradient model retain
+documented reduced Zeeman approximations for speed; they are not equivalent to
+this coherent Hamiltonian.

@@ -4,6 +4,22 @@ Every displayed result has a GitHub-friendly PNG, a vector SVG, and compact NPZ
 data where useful. Generated formats remain binary in Git diffs. These are model
 diagnostics, not fitted measurements.
 
+## Atomic structure and vector Zeeman coupling
+
+Generated with `python examples/generate_vector_zeeman_results.py`. The complete
+87Rb D2 ground/excited hyperfine manifolds use the full vector magnetic
+Hamiltonian rather than a projected `g_F m_F |B|` shift.
+
+| Exact ground/excited spectra | Linear approximation versus exact result |
+|---|---|
+| ![Exact vector Zeeman spectra](atomic_structure/exact_zeeman_spectra.png) | ![Linear versus exact Zeeman](atomic_structure/linear_vs_exact_zeeman.png) |
+| [SVG](atomic_structure/exact_zeeman_spectra.svg) | [SVG](atomic_structure/linear_vs_exact_zeeman.svg) |
+
+![Directional spectrum equivalence](atomic_structure/zeeman_direction_covariance.png)
+
+[Directional SVG](atomic_structure/zeeman_direction_covariance.svg) ·
+[Numerical data](atomic_structure/vector_zeeman_reference.npz)
+
 ## Effective semiclassical MOT and apparatus
 
 Reference: 87Rb D2, six 10 mW beams, 8 mm waist, δ=−2Γ, radial gradient

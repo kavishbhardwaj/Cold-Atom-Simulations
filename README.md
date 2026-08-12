@@ -32,7 +32,7 @@ are not faked here. See [atomic systems](docs/atomic_systems.md).
 | Effective semiclassical MOT | Fast shared-saturation Doppler/Zeeman force and trajectories |
 | Multilevel rate equations | Generated hyperfine/Zeeman populations, cooling and repump; no coherences |
 | Two-level OBE benchmark | Exact analytical/numerical coherence benchmark |
-| Sparse multilevel OBE | Generated Hamiltonian/collapse operators; expensive full six-beam validation remains |
+| Sparse multilevel OBE | Exact vector hyperfine–Zeeman Hamiltonian and collapse operators; full six-beam validation remains |
 | Polarization-gradient model | Phase/coherence-group-resolved light shifts, pumping and Sisyphus force; populations only |
 | Photon-event Monte Carlo | Exact ≥1 Poisson-event probability per step, absorption and spontaneous recoil |
 | Capture and loading/loss | Thermal surface-flux trajectories, isotope-resolved loading, and calibrated loss inputs |

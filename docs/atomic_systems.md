@@ -89,3 +89,19 @@ extension, not a wavelength switch.
 4. Define its cooling/repump or molasses configuration explicitly.
 5. Compare rate equations and OBEs under matched assumptions before adding the
    system to a public “supported” table.
+
+## Vector hyperfine–Zeeman Hamiltonian
+
+Coherent multilevel calculations use a field-independent uncoupled
+`|m_I,m_J>` basis and `H=A I·J+H_Q+mu_B(g_J J+g_I I)·B`. The electric-quadrupole
+term `H_Q` is included when both angular momenta admit rank two. A
+Clebsch–Gordan transformation exposes the coupled `|F,m_F>` ordering used by
+the optical dipole matrices. The construction recovers weak-field
+`g_F m_F mu_B B` slopes while retaining transverse-field mixing and nonlinear
+Zeeman shifts. Because the basis does not follow the local field, it remains
+continuous through `B=0` without choosing an arbitrary new quantization axis.
+
+Coupling to other fine-structure/electronic manifolds and diamagnetic terms is
+omitted. The calculation therefore describes hyperfine decoupling within the
+selected fine-structure manifold, not an unrestricted high-field
+Paschen–Back model.
