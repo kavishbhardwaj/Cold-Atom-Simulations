@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520">
+  <rect width="900" height="520" fill="white"/>
+  <text x="450" y="38" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold">From a 24 × 24 density matrix to a 576-component ODE</text>
+  <rect x="70" y="120" width="210" height="210" fill="#eef5ff" stroke="#333" stroke-width="2"/>
+  <text x="175" y="205" text-anchor="middle" font-family="Arial" font-size="27">ρ</text>
+  <text x="175" y="240" text-anchor="middle" font-family="Arial" font-size="18">24 × 24</text>
+  <text x="175" y="275" text-anchor="middle" font-family="Arial" font-size="14">density matrix</text>
+  <text x="330" y="225" text-anchor="middle" font-family="Arial" font-size="40">→</text>
+  <rect x="380" y="100" width="130" height="250" fill="#fff3e8" stroke="#333" stroke-width="2"/>
+  <text x="445" y="200" text-anchor="middle" font-family="Arial" font-size="23">vec(ρ)</text>
+  <text x="445" y="235" text-anchor="middle" font-family="Arial" font-size="17">576 × 1</text>
+  <text x="445" y="270" text-anchor="middle" font-family="Arial" font-size="14">column-major</text>
+  <text x="555" y="225" text-anchor="middle" font-family="Arial" font-size="40">→</text>
+  <rect x="615" y="100" width="220" height="250" fill="#eef9ee" stroke="#333" stroke-width="2"/>
+  <text x="725" y="185" text-anchor="middle" font-family="Arial" font-size="23">L</text>
+  <text x="725" y="220" text-anchor="middle" font-family="Arial" font-size="17">576 × 576</text>
+  <text x="725" y="250" text-anchor="middle" font-family="Arial" font-size="14">sparse Liouvillian</text>
+  <text x="725" y="285" text-anchor="middle" font-family="Arial" font-size="17">d vec(ρ)/dt</text>
+  <text x="725" y="315" text-anchor="middle" font-family="Arial" font-size="17">= L vec(ρ)</text>
+  <text x="450" y="405" text-anchor="middle" font-family="Arial" font-size="17">Coherent part: −i(I ⊗ h − hᵀ ⊗ I)</text>
+  <text x="450" y="437" text-anchor="middle" font-family="Arial" font-size="17">Dissipator: Σc [C*c ⊗ Cc − ½ I ⊗ Cc†Cc − ½ (Cc†Cc)ᵀ ⊗ I]</text>
+  <text x="450" y="478" text-anchor="middle" font-family="Arial" font-size="15">For a stationary solve, one Liouvillian row is replaced by Tr(ρ)=1.</text>
+</svg>
