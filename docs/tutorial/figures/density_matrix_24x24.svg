@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620">
+  <rect width="900" height="620" fill="white"/>
+  <text x="450" y="38" text-anchor="middle" font-family="Arial" font-size="25" font-weight="bold">24-state 87Rb D2 density matrix</text>
+  <text x="450" y="67" text-anchor="middle" font-family="Arial" font-size="16">8 ground states + 16 excited states</text>
+  <rect x="180" y="110" width="220" height="150" fill="#eef5ff" stroke="#333" stroke-width="2"/>
+  <rect x="400" y="110" width="320" height="150" fill="#fff3e8" stroke="#333" stroke-width="2"/>
+  <rect x="180" y="260" width="220" height="260" fill="#fff3e8" stroke="#333" stroke-width="2"/>
+  <rect x="400" y="260" width="320" height="260" fill="#eef9ee" stroke="#333" stroke-width="2"/>
+  <text x="290" y="165" text-anchor="middle" font-family="Arial" font-size="24">ρgg</text>
+  <text x="290" y="195" text-anchor="middle" font-family="Arial" font-size="17">8 × 8</text>
+  <text x="290" y="220" text-anchor="middle" font-family="Arial" font-size="14">ground populations +</text>
+  <text x="290" y="240" text-anchor="middle" font-family="Arial" font-size="14">ground-state coherences</text>
+  <text x="560" y="165" text-anchor="middle" font-family="Arial" font-size="24">ρge</text>
+  <text x="560" y="195" text-anchor="middle" font-family="Arial" font-size="17">8 × 16</text>
+  <text x="560" y="225" text-anchor="middle" font-family="Arial" font-size="14">optical coherences</text>
+  <text x="290" y="365" text-anchor="middle" font-family="Arial" font-size="24">ρeg</text>
+  <text x="290" y="395" text-anchor="middle" font-family="Arial" font-size="17">16 × 8</text>
+  <text x="290" y="425" text-anchor="middle" font-family="Arial" font-size="14">ρeg = ρge†</text>
+  <text x="560" y="365" text-anchor="middle" font-family="Arial" font-size="24">ρee</text>
+  <text x="560" y="395" text-anchor="middle" font-family="Arial" font-size="17">16 × 16</text>
+  <text x="560" y="425" text-anchor="middle" font-family="Arial" font-size="14">excited populations +</text>
+  <text x="560" y="445" text-anchor="middle" font-family="Arial" font-size="14">excited-state coherences</text>
+  <text x="110" y="185" text-anchor="middle" font-family="Arial" font-size="16">ground rows</text>
+  <text x="110" y="205" text-anchor="middle" font-family="Arial" font-size="16">g1 … g8</text>
+  <text x="110" y="375" text-anchor="middle" font-family="Arial" font-size="16">excited rows</text>
+  <text x="110" y="395" text-anchor="middle" font-family="Arial" font-size="16">e1 … e16</text>
+  <text x="290" y="555" text-anchor="middle" font-family="Arial" font-size="16">ground columns g1 … g8</text>
+  <text x="560" y="555" text-anchor="middle" font-family="Arial" font-size="16">excited columns e1 … e16</text>
+  <text x="450" y="595" text-anchor="middle" font-family="Arial" font-size="15">Hermitian: ρji = ρij*   •   Tr(ρ)=1   •   ρ ≥ 0</text>
+</svg>
