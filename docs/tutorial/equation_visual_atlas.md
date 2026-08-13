@@ -1,14 +1,14 @@
 # Equation visual atlas
 
-This page is the visual companion to the main tutorial. The small SVG figures below are **pedagogical plots of the stated equations**, not experimental measurements. The adjacent repository figures are actual generated simulation/validation results.
+This page is the visual companion to the main tutorial. The small SVG figures below are **pedagogical plots or structural diagrams of the stated equations**, not experimental measurements. The adjacent repository figures are actual generated simulation/validation results.
 
-The pedagogical plots are reproducible from the repository root with:
+The pedagogical equation plots are reproducible from the repository root with:
 
 ```bash
 python examples/generate_tutorial_equation_figures.py
 ```
 
-That script evaluates the analytical equations or the repository's low-level validated solvers and rewrites the SVG files under `docs/tutorial/figures/`. The visual distinction is deliberate: an **equation plot** teaches the shape implied by a formula; a **repository result** shows what the configured simulation actually produced.
+Structural diagrams such as the 24-state density matrix and Liouvillian are schematic representations of the exact matrix dimensions and block structure used by the code.
 
 ## Atomic structure
 
@@ -52,6 +52,22 @@ The full reference six-beam force map is:
 
 ![Effective MOT force map](../../results/effective_mot/force_map_x_vx.png)
 
+## The full 24-state density matrix
+
+For 8 ground and 16 excited states,
+
+$$
+\rho=
+\begin{pmatrix}
+\rho_{gg}&\rho_{ge}\\
+\rho_{eg}&\rho_{ee}
+\end{pmatrix},
+$$
+
+with block sizes $8\times8$, $8\times16$, $16\times8$, and $16\times16$.
+
+![24-state density matrix](figures/density_matrix_24x24.svg)
+
 ## Lindblad spontaneous decay
 
 $$
@@ -79,6 +95,29 @@ $$
 Independent QuTiP/PyLCP validation:
 
 ![External validation](../../results/validation/independent_software_comparison.png)
+
+## 576-dimensional Liouville-space equation
+
+Vectorizing the $24\times24$ density matrix gives a 576-component state:
+
+$$
+|\rho\rangle\rangle=\operatorname{vec}(\rho).
+$$
+
+The sparse Liouvillian equation is
+
+$$
+\frac{d}{dt}|\rho\rangle\rangle
+=\mathcal L|\rho\rangle\rangle,
+$$
+
+with
+
+$$
+\mathcal L\in\mathbb C^{576\times576}.
+$$
+
+![576-dimensional Liouvillian](figures/liouvillian_576.svg)
 
 ## Multilevel optical pumping
 
